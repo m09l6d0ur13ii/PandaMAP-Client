@@ -205,16 +205,16 @@ int CClient::SendMsgActive(CMsgPacker *pMsg, int Flags)
 	return SendMsg(g_Config.m_ClDummy, pMsg, Flags);
 }
 
-void CClient::SendTClientInfo(int Conn)
+void CClient::SendRClientInfo(int Conn)
 {
 	CMsgPacker Msg(NETMSG_IAMTATER, true);
-	Msg.AddString(TCLIENT_VERSION " built on " __DATE__ ", " __TIME__);
+	Msg.AddString(RCLIENT_VERSION " built on " __DATE__ ", " __TIME__);
 	SendMsg(Conn, &Msg, MSGFLAG_VITAL);
 }
 
 void CClient::SendInfo(int Conn)
 {
-	SendTClientInfo(CONN_MAIN);
+	SendRClientInfo(CONN_MAIN);
 
 	CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
 	MsgVer.AddRaw(&m_ConnectionId, sizeof(m_ConnectionId));
@@ -3274,7 +3274,7 @@ void CClient::Run()
 			m_DummySendConnInfo = false;
 
 			// send client info
-			SendTClientInfo(CONN_DUMMY);
+			SendRClientInfo(CONN_DUMMY);
 
 			SendInfo(CONN_DUMMY);
 			m_aNetClient[CONN_DUMMY].Update();

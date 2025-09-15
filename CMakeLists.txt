@@ -29,9 +29,9 @@ file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/data")
 
 file(WRITE "${DATA_VERSION_FILE}" "DDNet ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}\n")
 
-file(STRINGS src/game/version.h TCLIENT_VERSION_LINE
+file(STRINGS src/game/version.h RCLIENT_VERSION_LINE
   LIMIT_COUNT 1
-  REGEX "^#define TCLIENT_VERSION "
+  REGEX "^#define RCLIENT_VERSION "
 )
 
 if(TCLIENT_VERSION_LINE MATCHES "([0-9]+)\\.([0-9]+)\\.([0-9]+)")
@@ -43,7 +43,7 @@ elseif(TCLIENT_VERSION_LINE MATCHES "([0-9]+)\\.([0-9]+)")
   set(TCLIENT_VERSION_MINOR ${CMAKE_MATCH_2})
   set(TCLIENT_VERSION_PATCH "0")
 else()
-  message(FATAL_ERROR "Couldn't parse TClient version from src/game/version.h")
+  message(FATAL_ERROR "Couldn't parse RClient version from src/game/version.h")
 endif()
 
 if(TCLIENT_VERSION_PATCH STREQUAL "0")
@@ -52,7 +52,7 @@ else()
   project(TClient VERSION ${TCLIENT_VERSION_MAJOR}.${TCLIENT_VERSION_MINOR}.${TCLIENT_VERSION_PATCH})
 endif()
 
-file(APPEND "${DATA_VERSION_FILE}" "TClient ${TCLIENT_VERSION_MAJOR}.${TCLIENT_VERSION_MINOR}.${TCLIENT_VERSION_PATCH}\n")
+file(APPEND "${DATA_VERSION_FILE}" "RClient ${TCLIENT_VERSION_MAJOR}.${TCLIENT_VERSION_MINOR}.${TCLIENT_VERSION_PATCH}\n")
 
 # </TClient>
 

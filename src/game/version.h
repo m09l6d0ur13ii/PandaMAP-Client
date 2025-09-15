@@ -19,7 +19,10 @@ extern const char *GIT_SHORTREV_HASH;
 #define GAME_NETVERSION7 "0.7 802f1be60a05665f"
 
 // custom
-#define CLIENT_NAME "TClient"
+#define CLIENT_NAME "RClient"
+#ifndef RCLIENT_VERSION
+#define RCLIENT_VERSION "1.9.0"
+#endif
 #ifndef TCLIENT_VERSION
 #define TCLIENT_VERSION "10.5.0"
 #endif

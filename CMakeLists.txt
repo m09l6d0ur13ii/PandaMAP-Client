@@ -131,7 +131,7 @@ option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" OFF)
 option(TEST_MYSQL "Test mysql support in unit tests (also sets -DMYSQL=ON)" OFF)
 option(AUTOUPDATE "Enable the autoupdater" OFF)
-option(INFORM_UPDATE "Inform about available updates" ON)
+option(INFORM_UPDATE "Inform about available updates" OFF)
 option(VIDEORECORDER "Enable video recording support via FFmpeg" ON)
 option(UPNP "Enable UPnP support" OFF)
 option(ANTIBOT "Enable support for a dynamic anticheat library (not provided, see src/antibot for interface if you want to implement your own)" OFF)
@@ -2531,9 +2531,15 @@ if(CLIENT)
     components/players.h
     components/race_demo.cpp
     components/race_demo.h
+    components/rclient/adminpanel.cpp
+    components/rclient/adminpanel.h
     components/rclient/bindwheel.cpp
     components/rclient/bindwheel.h
+    components/rclient/chat_bubbles.cpp
+    components/rclient/chat_bubbles.h
     components/rclient/menus_rclient.cpp
+    components/rclient/rclient.cpp
+    components/rclient/rclient.h
     components/scoreboard.cpp
     components/scoreboard.h
     components/skins.cpp

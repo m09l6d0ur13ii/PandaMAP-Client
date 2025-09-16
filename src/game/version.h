@@ -21,7 +21,7 @@ extern const char *GIT_SHORTREV_HASH;
 // custom
 #define CLIENT_NAME "RClient"
 #ifndef RCLIENT_VERSION
-#define RCLIENT_VERSION "1.9.0"
+#define RCLIENT_VERSION "2.0.0"
 #endif
 
 #ifndef TCLIENT_VERSION

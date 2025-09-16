@@ -1,35 +1,22 @@
-#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
-#include <engine/shared/localization.h>
-#include <engine/shared/protocol7.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
-#include <engine/updater.h>
 
 #include <generated/protocol.h>
 #include <game/localization.h>
 
-#include <game/client/animstate.h>
-#include <game/client/components/chat.h>
-#include <game/client/components/countryflags.h>
 #include <game/client/components/menu_background.h>
 #include <game/client/components/menus.h>
 #include <game/client/components/rclient/bindwheel.h>
-#include <game/client/components/skins.h>
-#include <game/client/components/sounds.h>
 #include <game/client/components/tclient/bindchat.h>
-#include <game/client/components/tclient/trails.h>
 
 #include <game/client/gameclient.h>
-#include <game/client/render.h>
-#include <game/client/skin.h>
 #include <game/client/ui.h>
-#include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
 
 #include <vector>

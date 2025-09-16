@@ -15,9 +15,6 @@
 #include "adminpanel.h"
 
 #include "game/localization.h"
-
-#include <vulkan/vulkan_core.h>
-
 struct SPopupProperties
 {
 	static constexpr float ms_Width = 200.0f;

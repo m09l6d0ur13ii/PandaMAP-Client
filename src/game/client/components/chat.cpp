@@ -8,6 +8,8 @@
 #include <engine/shared/config.h>
 #include <engine/shared/csv.h>
 #include <engine/textrender.h>
+#include <regex>
+#include <string>
 
 #include <generated/protocol.h>
 #include <generated/protocol7.h>
@@ -559,17 +561,12 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 
-		if(g_Config.m_TcRegexChatIgnore[0])
+		if(g_Config.m_TcRegexChatIgnore[0] && g_Config.m_RiEnableCensorList)
 		{
-			RegexToken aTokens[512];
-			int16_t TokenCount = 512;
-			if(regex_parse(g_Config.m_TcRegexChatIgnore, aTokens, &TokenCount, 0))
-				GameClient()->Echo("Regex error");
-			else if(regex_match(aTokens, pMsg->m_pMessage, 0, 0, 0, 0) != -1)
-				return;
+			// const char* pFilteredMSG = FilterText(pMsg->m_pMessage, pMsg->m_ClientId, true);
+			// AddLine(pMsg->m_ClientId, pMsg->m_Team, pFilteredMSG);
 		}
-
-		if(g_Config.m_ClCensorChat)
+		else if(g_Config.m_ClCensorChat)
 		{
 			char aMessage[MAX_LINE_LENGTH];
 			str_copy(aMessage, pMsg->m_pMessage);
@@ -670,6 +667,30 @@ void CChat::StoreSave(const char *pText)
 	}
 	CsvWrite(File, 4, apColumns);
 	io_close(File);
+}
+
+bool CChat::LineHighlighted(int ClientId, const char *pLine)
+{
+	bool Highlighted = false;
+
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		if(ClientId >= 0 && ClientId != GameClient()->m_aLocalIds[0] && ClientId != GameClient()->m_aLocalIds[1])
+		{
+			for(int LocalId : GameClient()->m_aLocalIds)
+			{
+				Highlighted |= LocalId >= 0 && LineShouldHighlight(pLine, GameClient()->m_aClients[LocalId].m_aName);
+			}
+		}
+	}
+	else
+	{
+		// on demo playback use local id from snap directly,
+		// since m_aLocalIds isn't valid there
+		Highlighted |= GameClient()->m_Snap.m_LocalClientId >= 0 && LineShouldHighlight(pLine, GameClient()->m_aClients[GameClient()->m_Snap.m_LocalClientId].m_aName);
+	}
+
+	return Highlighted;
 }
 
 void CChat::AddLine(int ClientId, int Team, const char *pLine)
@@ -804,6 +825,8 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	CurrentLine.m_Whisper = Team >= 2;
 	CurrentLine.m_NameColor = -2;
 	CurrentLine.m_CustomColor = CustomColor;
+	// Анимация: сохраняем время появления
+	CurrentLine.m_AppearTime = time();
 
 	// check for highlighted name
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -837,6 +860,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	else
 	{
 		const auto &LineAuthor = GameClient()->m_aClients[CurrentLine.m_ClientId];
+		// const auto &FilteredLineAuthor = FilterText(LineAuthor.m_aName);
 
 		if(LineAuthor.m_Active)
 		{
@@ -858,7 +882,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 			if(LineAuthor.m_Active)
 			{
 				str_append(CurrentLine.m_aName, " ");
-				str_append(CurrentLine.m_aName, LineAuthor.m_aName);
+				// str_append(CurrentLine.m_aName, FilteredLineAuthor);
 			}
 			CurrentLine.m_NameColor = TEAM_BLUE;
 			CurrentLine.m_Highlighted = false;
@@ -870,7 +894,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 			if(LineAuthor.m_Active)
 			{
 				str_append(CurrentLine.m_aName, " ");
-				str_append(CurrentLine.m_aName, LineAuthor.m_aName);
+				// str_append(CurrentLine.m_aName, FilteredLineAuthor);
 			}
 			CurrentLine.m_NameColor = TEAM_RED;
 			CurrentLine.m_Highlighted = true;
@@ -878,7 +902,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		}
 		else
 		{
-			str_copy(CurrentLine.m_aName, LineAuthor.m_aName);
+			// str_copy(CurrentLine.m_aName, FilteredLineAuthor);
 		}
 
 		if(LineAuthor.m_Active)
@@ -1490,7 +1514,29 @@ void CChat::OnRender()
 		if(y < HeightLimit)
 			break;
 
+		// --- Анимация появления новой строки ---
 		float Blend = Now > Line.m_Time + 14 * time_freq() && !m_PrevShowChat ? 1.0f - (Now - Line.m_Time - 14 * time_freq()) / (2.0f * time_freq()) : 1.0f;
+
+		float AppearAlpha = 1.0f;
+		float SlideOffset = 0.0f;
+		if(g_Config.m_RiChatAnim)
+		{
+			// Длительность анимации (ограничиваем разумными пределами)
+			int animMs = g_Config.m_RiChatAnimMs;
+			float animSec = animMs / 1000.0f;
+
+			float appearTime = (float)(Now - Line.m_AppearTime) / (float)time_freq();
+			float progress = appearTime / animSec;
+			if(progress < 1.0f)
+			{
+				// Можно использовать плавную функцию (например, QuadEaseOut)
+				float ease = progress < 1.0f ? (1.0f - (1.0f - progress) * (1.0f - progress)) : 1.0f;
+				AppearAlpha = ease;
+				SlideOffset = (1.0f - ease) * 24.0f; // 24px вниз, потом выезжает вверх
+			}
+		}
+
+		Blend *= AppearAlpha;
 
 		// Draw backgrounds for messages in one batch
 		if(!g_Config.m_ClChatOld)
@@ -1499,7 +1545,7 @@ void CChat::OnRender()
 			if(Line.m_QuadContainerIndex != -1)
 			{
 				Graphics()->SetColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClChatBackgroundColor, true)).WithMultipliedAlpha(Blend));
-				Graphics()->RenderQuadContainerEx(Line.m_QuadContainerIndex, 0, -1, 0, ((y + RealMsgPaddingY / 2.0f) - Line.m_TextYOffset));
+				Graphics()->RenderQuadContainerEx(Line.m_QuadContainerIndex, 0, -1, 0, ((y + RealMsgPaddingY / 2.0f + SlideOffset) - Line.m_TextYOffset));
 			}
 		}
 
@@ -1518,13 +1564,13 @@ void CChat::OnRender()
 				const CAnimState *pIdleState = CAnimState::GetIdle();
 				vec2 OffsetToMid;
 				CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeRenderInfo, OffsetToMid);
-				vec2 TeeRenderPos(x + (RealMsgPaddingX + TeeSize) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + OffsetToMid.y);
+				vec2 TeeRenderPos(x + (RealMsgPaddingX + TeeSize) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + OffsetToMid.y + SlideOffset);
 				RenderTools()->RenderTee(pIdleState, &TeeRenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
 			}
 
 			const ColorRGBA TextColor = TextRender()->DefaultTextColor().WithMultipliedAlpha(Blend);
 			const ColorRGBA TextOutlineColor = TextRender()->DefaultTextOutlineColor().WithMultipliedAlpha(Blend);
-			TextRender()->RenderTextContainer(Line.m_TextContainerIndex, TextColor, TextOutlineColor, 0, (y + RealMsgPaddingY / 2.0f) - Line.m_TextYOffset);
+			TextRender()->RenderTextContainer(Line.m_TextContainerIndex, TextColor, TextOutlineColor, 0, (y + RealMsgPaddingY / 2.0f + SlideOffset) - Line.m_TextYOffset);
 		}
 	}
 }
@@ -1549,7 +1595,44 @@ void CChat::EnsureCoherentWidth() const
 	g_Config.m_ClChatWidth = CHAT_FONTSIZE_WIDTH_RATIO * g_Config.m_ClChatFontSize;
 }
 
-// ----- send functions -----
+// Функция для транслитерации русских команд в английские по раскладке клавиатуры
+const char *TransliterateCommand(const char *pCommand)
+{
+	// Таблица соответствия русских букв английским по раскладке клавиатуры
+	static const struct
+	{
+		const char *pRu;
+		const char *pEn;
+	} s_aTranslit[] = {
+		{"е", "t"}, {"у", "e"}, {"ф", "a"}, {"ь", "m"},
+		{"д", "l"}, {"щ", "o"}, {"с", "c"}, {"л", "k"},
+		{"з", "p"}, {"ы", "z"}, {"и", "b"}, {"к", "r"},
+		{"а", "f"}, {"в", "d"}, {"г", "u"}, {"ё", "`"},
+		{"ж", ";"}, {"й", "q"}, {"м", "v"}, {"н", "y"},
+		{"о", "j"}, {"п", "g"}, {"р", "h"}, {"т", "n"},
+		{"х", "["}, {"ц", "w"}, {"ч", "x"}, {"ш", "i"},
+		{"ъ", "]"}, {"э", "s"}, {"ю", "."}, {"я", "`"},
+		{"б", ","}};
+
+	static char aResult[256];
+	str_copy(aResult, pCommand, sizeof(aResult));
+
+	// Заменяем каждую русскую букву на соответствующую английскую
+	for(const auto &Pair : s_aTranslit)
+	{
+		const char *pPos = aResult;
+		while((pPos = str_find(pPos, Pair.pRu)) != nullptr)
+		{
+			char aTemp[256];
+			str_copy(aTemp, pPos + str_length(Pair.pRu), sizeof(aTemp));
+			str_copy((char *)pPos, Pair.pEn, sizeof(aResult) - (pPos - aResult));
+			str_append((char *)pPos, aTemp, sizeof(aResult) - (pPos - aResult));
+			pPos += str_length(Pair.pEn);
+		}
+	}
+
+	return aResult;
+}
 
 void CChat::SendChat(int Team, const char *pLine)
 {
@@ -1558,6 +1641,44 @@ void CChat::SendChat(int Team, const char *pLine)
 		return;
 
 	m_LastChatSend = time();
+
+	// Проверяем, начинается ли сообщение с точки или слеша
+	if(pLine[0] == '.' || pLine[0] == '/')
+	{
+		// Разделяем команду и параметры
+		char aCommand[256];
+		const char *pSpace = str_find(pLine, " ");
+		if(pSpace)
+		{
+			str_truncate(aCommand, sizeof(aCommand), pLine, pSpace - pLine);
+		}
+		else
+		{
+			str_copy(aCommand, pLine, sizeof(aCommand));
+		}
+
+		const char *pTranslit = TransliterateCommand(aCommand);
+
+		// Проверяем, есть ли такая команда в списке
+		for(const auto &Command : m_vServerCommands)
+		{
+			if(str_comp_nocase(Command.m_aName, pTranslit + 1) == 0)
+			{
+				// Если команда найдена, отправляем её английскую версию с параметрами
+				char aBuf[256];
+				if(pSpace)
+				{
+					str_format(aBuf, sizeof(aBuf), "/%s%s", Command.m_aName, pSpace);
+				}
+				else
+				{
+					str_format(aBuf, sizeof(aBuf), "/%s", Command.m_aName);
+				}
+				pLine = aBuf;
+				break;
+			}
+		}
+	}
 
 	if(GameClient()->Client()->IsSixup())
 	{
@@ -1601,4 +1722,117 @@ void CChat::SendChatQueued(const char *pLine)
 		pEntry->m_Team = m_Mode == MODE_ALL ? 0 : 1;
 		str_copy(pEntry->m_aText, pLine, Length + 1);
 	}
+
+
 }
+
+// const char* CChat::FilterText(const char* pMessage, int ClientId, bool IsChat)
+// {
+// 	if(!pMessage || !g_Config.m_TcRegexChatIgnore[0] || !g_Config.m_RiEnableCensorList)
+// 		return pMessage;
+//
+// 	static char s_aFilteredMessage[1024];
+// 	s_aFilteredMessage[0] = '\0';
+// 	if(g_Config.m_RiRegexPlayerWhitelist[0] && ClientId >= 0)
+// 	{
+// 		std::vector<std::string> SplitPlayers = CRClient::SplitRegex(g_Config.m_RiRegexPlayerWhitelist);
+// 		for(size_t i = 0; i < SplitPlayers.size(); i++)
+// 		{
+// 			if(!str_comp(GameClient()->m_aClients[ClientId].m_aName, SplitPlayers[i].c_str()))
+// 				return pMessage;
+// 		}
+// 	}
+// 	std::vector<std::string> SplitRegex = CRClient::SplitRegex(g_Config.m_TcRegexChatIgnore);
+// 	std::vector<std::string> SplitMsg = CRClient::SplitWords(pMessage);
+// 	std::vector<std::string> BlockedWords;
+// 	bool Isbadwordinclude = false;
+// 	for(size_t i = 0; i < SplitRegex.size(); i++)
+// 	{
+// 		if(str_utf8_find_nocase(pMessage, SplitRegex[i].c_str()))
+// 			Isbadwordinclude = true;
+// 	}
+// 	if(Isbadwordinclude)
+// 	{
+// 		for(size_t w = 0; w < SplitMsg.size(); w++)
+// 		{
+// 			bool IsBlocked = false;
+// 			for(size_t i = 0; i < SplitRegex.size(); i++)
+// 			{
+// 				if(str_utf8_find_nocase(SplitMsg[w].c_str(), SplitRegex[i].c_str()))
+// 				{
+// 					IsBlocked = true;
+//
+// 					if(g_Config.m_RiShowBlockedWordInConsole && IsChat)
+// 					{
+// 						bool AlreadyBlocked = false;
+// 						for(size_t o = 0; o < BlockedWords.size(); o++)
+// 						{
+// 							if(str_comp(SplitRegex[i].c_str(), BlockedWords[o].c_str()) == 0)
+// 							{
+// 								AlreadyBlocked = true;
+// 								break;
+// 							}
+// 						}
+//
+// 						// Add word only if it's not already blocked
+// 						if(!AlreadyBlocked)
+// 						{
+// 							BlockedWords.push_back(SplitRegex[i]);
+// 						}
+// 					}
+// 					break;
+// 				}
+// 			}
+// 			if(w > 0)
+// 				str_append(s_aFilteredMessage, " ", sizeof(s_aFilteredMessage));
+//
+// 			if(IsBlocked)
+// 			{
+//
+// 				if(g_Config.m_RiMultipleReplacementChar)
+// 				{
+// 					size_t size = 0, count = 0;
+// 					// Use a reasonable upper bound for UTF-8: max 4 bytes per character
+// 					str_utf8_stats(SplitMsg[w].c_str(), SplitMsg[w].length() * 4, SplitMsg[w].length(), &size, &count);
+// 					for(size_t i = 0; i < count; i++)
+// 					{
+// 						str_append(s_aFilteredMessage, g_Config.m_RiBlockedContentReplacementChar, sizeof(s_aFilteredMessage));
+// 					}
+// 				}
+// 				else
+// 				{
+// 					str_append(s_aFilteredMessage, g_Config.m_RiBlockedContentReplacementChar, sizeof(s_aFilteredMessage));
+// 				}
+// 			}
+// 			else
+// 			{
+// 				str_append(s_aFilteredMessage, SplitMsg[w].c_str(), sizeof(s_aFilteredMessage));
+// 			}
+// 		}
+//
+// 		if(g_Config.m_RiShowBlockedWordInConsole && !BlockedWords.empty() && IsChat)
+// 		{
+// 			char aBlockedWordsStr[512];
+// 			aBlockedWordsStr[0] = '\0';
+// 			if(ClientId >= 0)
+// 			{
+// 				str_format(aBlockedWordsStr, sizeof(aBlockedWordsStr), "%s said: ", GameClient()->m_aClients[ClientId].m_aName);
+// 			}
+// 			else if(ClientId == SERVER_MSG)
+// 			{
+// 				str_copy(aBlockedWordsStr, "Server said: ", sizeof(aBlockedWordsStr));
+// 			}
+// 			for(size_t i = 0; i < BlockedWords.size(); i++)
+// 			{
+// 				if(i > 0)
+// 					str_append(aBlockedWordsStr, ", ", sizeof(aBlockedWordsStr));
+// 				str_append(aBlockedWordsStr, BlockedWords[i].c_str(), sizeof(aBlockedWordsStr));
+// 			}
+// 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Regex filter", aBlockedWordsStr, g_Config.m_RiBlockedWordConsoleColor);
+// 		}
+//
+// 		return s_aFilteredMessage;
+// 	}
+// 	else
+// 		return pMessage;
+// }

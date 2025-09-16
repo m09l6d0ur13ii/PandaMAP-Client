@@ -139,13 +139,15 @@ void CGameClient::OnConsoleInit()
 					      &m_Trails,
 					      &m_Translate,
 					      &m_Ghost,
-					      &m_TClient, // Must be before chat and players
+					      &m_TClient,
+					      // &m_RClient,// Must be before chat and players
 					      &m_Players,
 					      &m_MapLayersForeground,
 					      &m_Outlines,
 					      &m_Pet,
 					      &m_Particles.m_RenderExplosions,
 					      &m_NamePlates,
+					      // &m_ChatBubbles, // E-Client
 					      &m_Particles.m_RenderExtra,
 					      &m_Particles.m_RenderGeneral,
 					      &m_FreezeBars,
@@ -157,6 +159,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Emoticon,
 					      &m_BindChat,
 					      &m_BindWheel,
+					      &m_BindWheelSpec,
 					      &m_WarList,
 					      &m_StatusBar,
 					      &m_InfoMessages,
@@ -164,6 +167,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Broadcast,
 					      &m_DebugHud,
 					      &m_TouchControls,
+					      // &m_AdminPanelRi,
 					      &m_Scoreboard,
 					      &m_Statboard,
 					      &m_Motd,
@@ -178,10 +182,13 @@ void CGameClient::OnConsoleInit()
 	m_vpInput.insert(m_vpInput.end(), {&m_Menus.m_Binder, // this will take over all input when we want to bind a key
 						  &m_Binds.m_SpecialBinds,
 						  &m_GameConsole,
-						  &m_Chat, // chat has higher prio, due to that you can quit it by pressing esc
+						  &m_Chat,	// chat has higher prio, due to that you can quit it by pressing esc
+						  // &m_AdminPanelRi,
+						  &m_Scoreboard,
 						  &m_Motd, // for pressing esc to remove it
 						  &m_Spectator,
 						  &m_BindWheel,
+						  &m_BindWheelSpec,
 						  &m_Emoticon,
 						  &m_Menus,
 						  &m_Controls,
@@ -198,6 +205,15 @@ void CGameClient::OnConsoleInit()
 
 	// add basic console commands
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
+	// Console()->Register("find_skin", "r[player]", CFGFLAG_CLIENT, ConFindSkin, this, "Find skin");
+	// Console()->Register("copy_skin", "r[player]", CFGFLAG_CLIENT, ConCopySkin, this, "Copy skin");
+	// Console()->Register("find_player", "r[player]", CFGFLAG_CLIENT, ConFindPlayer, this, "Find Player");
+	// Console()->Register("copy_player", "r[player]", CFGFLAG_CLIENT, ConCopyPlayer, this, "Copy Player");
+	// Console()->Register("copy_color", "r[player]", CFGFLAG_CLIENT, ConCopyColor, this, "Copy Color skin");
+	// Console()->Register("tracker", "r[player]", CFGFLAG_CLIENT, ConTargetPlayerPos, this, "Track player pos");
+	// Console()->Register("tracker_reset", "", CFGFLAG_CLIENT, ConTargetPlayerPosReset, this, "Reset tracker pos");
+	// Console()->Register("tracker_remove", "r[player]", CFGFLAG_CLIENT, ConTargetPlayerPosRemove, this, "Remove tracker pos of player");
+	// Console()->Register("add_censor_list", "r[word]", CFGFLAG_CLIENT, ConAddCensorList, this, "Reset tracker pos");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself to restart");
 	Console()->Register("ready_change", "", CFGFLAG_CLIENT, ConReadyChange7, this, "Change ready state (0.7 only)");
 

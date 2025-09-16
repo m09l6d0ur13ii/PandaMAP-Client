@@ -81,6 +81,9 @@
 #include "components/touch_controls.h"
 #include "components/voting.h"
 
+//Rclient
+#include "components/rclient/bindwheel.h"
+
 #include <vector>
 
 class CGameInfo
@@ -217,6 +220,12 @@ public:
 	CWarList m_WarList;
 	CConditional m_Conditional;
 	CMod m_Mod;
+
+	// RClient Components
+	// CChatBubbles m_ChatBubbles;
+	// CRClient m_RClient;
+	CBindWheelSpec m_BindWheelSpec;
+	// CAdminPanel m_AdminPanelRi;
 
 private:
 	std::vector<class CComponent *> m_vpAll;

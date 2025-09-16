@@ -41,6 +41,15 @@ public:
 	bool m_ShowHookStrongWeakId;
 	int m_HookStrongWeakId;
 	float m_FontSizeHookStrongWeak;
+	int m_ShowFireDetection;
+	float m_FontSizeFireDetection;
+	int m_IsFireFireDetection;
+	int m_ShowHookDetection;
+	float m_FontSizeHookDetection;
+	int m_IsHookHookDetection;
+	int m_ShowRClientIndicator;
+	float m_FontSizeRClientIndicator;
+	int m_IsUserRClientIndicator;
 };
 
 class CNamePlates : public CComponent
@@ -58,6 +67,9 @@ public:
 	void OnRender() override;
 	CNamePlates();
 	~CNamePlates() override;
+
+	// R-Client
+	void RiResetNameplatesPos(CGameClient &This, const char *pScheme) const;
 };
 
 #endif

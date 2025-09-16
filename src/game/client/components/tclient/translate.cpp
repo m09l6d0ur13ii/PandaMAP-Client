@@ -332,9 +332,9 @@ void CTranslate::Translate(const char *pName, bool ShowProgress)
 	if(GameClient()->m_Chat.m_CurrentLine > 0)
 	{
 		int ScoreBest = -1;
-		for(int i = 0; i < CChat::MAX_LINES; i++)
+		for(int i = 0; i < MAX_LINES; i++)
 		{
-			CChat::CLine *pLine = &GameClient()->m_Chat.m_aLines[((GameClient()->m_Chat.m_CurrentLine - i) + CChat::MAX_LINES) % CChat::MAX_LINES];
+			CChat::CLine *pLine = &GameClient()->m_Chat.m_aLines[((GameClient()->m_Chat.m_CurrentLine - i) + MAX_LINES) % MAX_LINES];
 			if(pLine->m_pTranslateResponse != nullptr)
 				continue;
 			if(pLine->m_ClientId == CChat::CLIENT_MSG)

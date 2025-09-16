@@ -164,6 +164,20 @@ void CBindChat::AddBind(const CBind &Bind)
 	m_vBinds.push_back(Bind);
 }
 
+void CBindChat::RemoveBindCommand(const char *pCommand)
+{
+	if(pCommand[0] == '\0')
+		return;
+	for(auto It = m_vBinds.begin(); It != m_vBinds.end(); ++It)
+	{
+		if(str_comp(It->m_aCommand, pCommand) == 0)
+		{
+			m_vBinds.erase(It);
+			return;
+		}
+	}
+}
+
 bool CBindChat::RemoveBind(const char *pName)
 {
 	for(auto It = m_vBinds.begin(); It != m_vBinds.end(); ++It)
@@ -337,7 +351,7 @@ bool CBindChat::ChatDoAutocomplete(bool ShiftPressed)
 	// insert the command
 	if(pCompletionBind)
 	{
-		char aBuf[CChat::MAX_LINE_LENGTH];
+		char aBuf[MAX_LINE_LENGTH];
 		// add part before the name
 		str_truncate(aBuf, sizeof(aBuf), Chat.m_Input.GetString(), Chat.m_PlaceholderOffset);
 

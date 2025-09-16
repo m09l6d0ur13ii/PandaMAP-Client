@@ -2531,6 +2531,8 @@ if(CLIENT)
     components/players.h
     components/race_demo.cpp
     components/race_demo.h
+    components/rclient/bindwheel.cpp
+    components/rclient/bindwheel.h
     components/rclient/menus_rclient.cpp
     components/scoreboard.cpp
     components/scoreboard.h

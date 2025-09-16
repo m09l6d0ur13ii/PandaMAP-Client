@@ -288,7 +288,7 @@ protected:
 	}
 	void UpdateText(CGameClient &This, const CNamePlateData &Data) override
 	{
-		m_FontSize = Data.m_FontSize;
+		m_FontSize = Data.m_FontSize * (g_Config.m_RiHeartSize == 100 ? 101 : g_Config.m_RiHeartSize) / 100.0f;
 		CTextCursor Cursor;
 		This.TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 		Cursor.m_FontSize = m_FontSize;
@@ -330,7 +330,10 @@ protected:
 	void UpdateText(CGameClient &This, const CNamePlateData &Data) override
 	{
 		m_FontSize = Data.m_FontSize;
-		str_copy(m_aText, Data.m_pName, sizeof(m_aText));
+		// if (g_Config.m_RiEnableCensorList)
+			// str_copy(m_aText, This.m_Chat.FilterText(Data.m_pName), sizeof(m_aText));
+		// else
+			str_copy(m_aText, Data.m_pName, sizeof(m_aText));
 		CTextCursor Cursor;
 		Cursor.m_FontSize = m_FontSize;
 		This.TextRender()->CreateOrAppendTextContainer(m_TextContainerIndex, &Cursor, m_aText);
@@ -591,6 +594,85 @@ public:
 		CNamePlatePartText(This) {}
 };
 
+// ***** RClient Parts *****
+class CNamePlatePartFireDetector : public CNamePlatePartSprite
+{
+protected:
+	void Update(CGameClient &This, const CNamePlateData &Data) override
+	{
+		if(!Data.m_ShowFireDetection)
+		{
+			m_ShiftOnInvis = false;
+			m_Visible = false;
+			return;
+		}
+		m_ShiftOnInvis = !g_Config.m_RiShowFireDynamic; // Only shift (horizontally) the other parts if directions as a whole is visible
+		m_Size = vec2(Data.m_FontSizeFireDetection + DEFAULT_PADDING, Data.m_FontSizeFireDetection + DEFAULT_PADDING);
+		m_Sprite = SPRITE_RI_HAMMER;
+		m_Visible = Data.m_IsFireFireDetection;
+
+		m_Color.a = Data.m_Color.a;
+	}
+public:
+	CNamePlatePartFireDetector(CGameClient &This) :
+		CNamePlatePartSprite(This)
+	{
+		m_Texture = g_pData->m_aImages[IMAGE_RIHAMMER].m_Id;
+		m_Padding = vec2(0.0f, 0.0f);
+	}
+};
+class CNamePlatePartHookDetector : public CNamePlatePartSprite
+{
+protected:
+	void Update(CGameClient &This, const CNamePlateData &Data) override
+	{
+		if(!Data.m_ShowHookDetection)
+		{
+			m_ShiftOnInvis = false;
+			m_Visible = false;
+			return;
+		}
+		m_ShiftOnInvis = !g_Config.m_RiShowHookDynamic; // Only shift (horizontally) the other parts if directions as a whole is visible
+		m_Size = vec2(Data.m_FontSizeHookDetection + DEFAULT_PADDING, Data.m_FontSizeHookDetection + DEFAULT_PADDING);
+		m_Sprite = SPRITE_RI_HOOK;
+		m_Visible = Data.m_IsHookHookDetection;
+
+		m_Color.a = Data.m_Color.a;
+	}
+public:
+	CNamePlatePartHookDetector(CGameClient &This) :
+		CNamePlatePartSprite(This)
+	{
+		m_Texture = g_pData->m_aImages[IMAGE_RIHOOK].m_Id;
+		m_Padding = vec2(0.0f, 0.0f);
+	}
+};
+class CNamePlatePartRClientIndicator : public CNamePlatePartSprite
+{
+protected:
+	void Update(CGameClient &This, const CNamePlateData &Data) override
+	{
+		if(!Data.m_ShowRClientIndicator)
+		{
+			m_ShiftOnInvis = false;
+			m_Visible = false;
+			return;
+		}
+		m_ShiftOnInvis = !g_Config.m_RiShowIndicatorDynamic; // Only shift (horizontally) the other parts if directions as a whole is visible
+		m_Size = vec2(Data.m_FontSizeRClientIndicator + DEFAULT_PADDING, Data.m_FontSizeRClientIndicator + DEFAULT_PADDING);
+		m_Sprite = SPRITE_RI_ICON;
+		m_Visible = Data.m_IsUserRClientIndicator;
+
+		m_Color.a = Data.m_Color.a;
+	}
+public:
+	CNamePlatePartRClientIndicator(CGameClient &This) :
+		CNamePlatePartSprite(This)
+	{
+		m_Texture = g_pData->m_aImages[IMAGE_RIICON].m_Id;
+		m_Padding = vec2(0.0f, 0.0f);
+	}
+};
 // ***** Name Plates *****
 
 class CNamePlate
@@ -628,34 +710,19 @@ private:
 			return;
 		m_Inited = true;
 
-		AddPart<CNamePlatePartPing>(This); // TClient
-		AddPart<CNamePlatePartIgnoreMark>(This); // TClient
-		AddPart<CNamePlatePartFriendMark>(This);
-		AddPart<CNamePlatePartClientId>(This, false);
-		AddPart<CNamePlatePartName>(This);
-		AddPart<CNamePlatePartNewLine>(This);
-
-		AddPart<CNamePlatePartClan>(This);
-		AddPart<CNamePlatePartNewLine>(This);
-
-		AddPart<CNamePlatePartReason>(This); // TClient
-		AddPart<CNamePlatePartNewLine>(This); // TClient
-		AddPart<CNamePlatePartSkin>(This); // TClient
-		AddPart<CNamePlatePartNewLine>(This); // TClient
-
-		AddPart<CNamePlatePartClientId>(This, true);
-		AddPart<CNamePlatePartNewLine>(This);
-
-		AddPart<CNamePlatePartHookStrongWeak>(This);
-		AddPart<CNamePlatePartHookStrongWeakId>(This);
-		AddPart<CNamePlatePartNewLine>(This);
-
-		AddPart<CNamePlatePartDirection>(This, DIRECTION_LEFT);
-		AddPart<CNamePlatePartDirection>(This, DIRECTION_UP);
-		AddPart<CNamePlatePartDirection>(This, DIRECTION_RIGHT);
+		// Check if custom scheme is enabled
+		if(str_comp(g_Config.m_RiNamePlateScheme, "") != 0)
+		{
+			ApplyNamePlateScheme(This, g_Config.m_RiNamePlateScheme);
+		}
+		else
+		{
+			ApplyDefaultNamePlateScheme(This);
+		}
 	}
 
 public:
+	bool IsInited() const { return m_Inited; }
 	CNamePlate() = default;
 	CNamePlate(CGameClient &This, const CNamePlateData &Data)
 	{
@@ -738,6 +805,110 @@ public:
 		HTotal += LineSize.y;
 		return vec2(WMax, HTotal);
 	}
+
+	void ApplyNamePlateScheme(CGameClient &This, const char *pScheme)
+	{
+		// Clear existing parts
+		for(auto &Part : m_vpParts)
+			Part->Reset(This);
+		m_vpParts.clear();
+
+		// Add parts based on scheme
+		for(int i = 0; pScheme[i] != '\0'; ++i)
+		{
+			char SchemeLetter = pScheme[i];
+
+			// Add parts based on letter
+			switch(SchemeLetter)
+			{
+			case 'p': // Ping
+				AddPart<CNamePlatePartPing>(This);
+				break;
+			case 'i': // Ignore
+				AddPart<CNamePlatePartIgnoreMark>(This);
+				break;
+			case 'm': // Mark (Client ID)
+				AddPart<CNamePlatePartClientId>(This, false);
+				break;
+			case 'n': // Name
+				AddPart<CNamePlatePartName>(This);
+				break;
+			case 'c': // Clan
+				AddPart<CNamePlatePartClan>(This);
+				break;
+			case 'd': // Direction
+				AddPart<CNamePlatePartDirection>(This, DIRECTION_LEFT);
+				AddPart<CNamePlatePartDirection>(This, DIRECTION_UP);
+				AddPart<CNamePlatePartDirection>(This, DIRECTION_RIGHT);
+				break;
+			case 'f': // Friend
+				AddPart<CNamePlatePartFriendMark>(This);
+				break;
+			case 'h': // Hook
+				AddPart<CNamePlatePartHookStrongWeak>(This);
+				AddPart<CNamePlatePartHookStrongWeakId>(This);
+				break;
+			case 'r': // Reason
+				AddPart<CNamePlatePartReason>(This);
+				break;
+			case 's': // Skin
+				AddPart<CNamePlatePartSkin>(This);
+				break;
+			case 'l': // New Line
+				AddPart<CNamePlatePartNewLine>(This);
+				break;
+			case 'H': // Hook Detection
+				AddPart<CNamePlatePartHookDetector>(This);
+				break;
+			case 'F': // Hammer Detection (Fire Detection)
+				AddPart<CNamePlatePartFireDetector>(This);
+				break;
+			case 'I': // RClient Indicator
+				AddPart<CNamePlatePartRClientIndicator>(This);
+				break;
+			}
+
+		}
+	}
+
+	void ApplyDefaultNamePlateScheme(CGameClient &This)
+	{
+		for(auto &Part : m_vpParts)
+			Part->Reset(This);
+		m_vpParts.clear();
+		// Default layout (backward compatibility)
+		AddPart<CNamePlatePartRClientIndicator>(This); // Rclient
+		AddPart<CNamePlatePartPing>(This); // TClient
+		AddPart<CNamePlatePartIgnoreMark>(This); // TClient
+		AddPart<CNamePlatePartFriendMark>(This);
+		AddPart<CNamePlatePartClientId>(This, false);
+		AddPart<CNamePlatePartName>(This);
+		AddPart<CNamePlatePartNewLine>(This);
+
+		AddPart<CNamePlatePartClan>(This);
+		AddPart<CNamePlatePartNewLine>(This);
+
+		AddPart<CNamePlatePartReason>(This); // TClient
+		AddPart<CNamePlatePartNewLine>(This); // TClient
+
+		AddPart<CNamePlatePartHookDetector>(This); // RClient
+		AddPart<CNamePlatePartFireDetector>(This); // RClient
+		AddPart<CNamePlatePartNewLine>(This); // TClient
+
+		AddPart<CNamePlatePartSkin>(This); // TClient
+		AddPart<CNamePlatePartNewLine>(This); // TClient
+
+		AddPart<CNamePlatePartClientId>(This, true);
+		AddPart<CNamePlatePartNewLine>(This);
+
+		AddPart<CNamePlatePartHookStrongWeak>(This);
+		AddPart<CNamePlatePartHookStrongWeakId>(This);
+		AddPart<CNamePlatePartNewLine>(This);
+
+		AddPart<CNamePlatePartDirection>(This, DIRECTION_LEFT);
+		AddPart<CNamePlatePartDirection>(This, DIRECTION_UP);
+		AddPart<CNamePlatePartDirection>(This, DIRECTION_RIGHT);
+	}
 };
 
 class CNamePlates::CNamePlatesData
@@ -782,6 +953,9 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 
 	Data.m_FontSizeHookStrongWeak = 18.0f + 20.0f * g_Config.m_ClNamePlatesStrongSize / 100.0f;
 	Data.m_FontSizeDirection = 18.0f + 20.0f * g_Config.m_ClDirectionSize / 100.0f;
+	Data.m_FontSizeFireDetection = 18.0f + 20.0f * g_Config.m_RiFireDetectionSize / 100.0f;
+	Data.m_FontSizeHookDetection = 18.0f + 20.0f * g_Config.m_RiHookDetectionSize / 100.0f;
+	Data.m_FontSizeRClientIndicator = 18.0f + 20.0f * g_Config.m_RiRclientIndicatorSize / 100.0f;
 
 	if(g_Config.m_ClNamePlatesAlways == 0)
 		Alpha *= std::clamp(1.0f - std::pow(distance(GameClient()->m_Controls.m_aTargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
@@ -884,6 +1058,141 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 		}
 	}
 
+	//RClient
+	int ShowFireDetecitonConfig = g_Config.m_RiShowFire;
+	Data.m_ShowFireDetection = false;
+	Data.m_IsFireFireDetection = false;
+	switch(ShowFireDetecitonConfig)
+	{
+	case 0: // Off
+		Data.m_ShowFireDetection = false;
+		break;
+	case 1: // Only dummy
+		Data.m_ShowFireDetection = pPlayerInfo->m_ClientId == GameClient()->m_aLocalIds[!g_Config.m_ClDummy];
+		break;
+	case 2: // Both
+		Data.m_ShowFireDetection = pPlayerInfo->m_ClientId == GameClient()->m_aLocalIds[!g_Config.m_ClDummy] || pPlayerInfo->m_Local;
+		break;
+	case 3: // Only self
+		Data.m_ShowFireDetection = pPlayerInfo->m_Local;
+		break;
+	default:
+		dbg_assert(false, "ShowFireDetectionConfig invalid");
+		dbg_break();
+	}
+	if(Data.m_ShowFireDetection)
+	{
+		if(Client()->State() != IClient::STATE_DEMOPLAYBACK &&
+			pPlayerInfo->m_ClientId == GameClient()->m_aLocalIds[!g_Config.m_ClDummy])
+		{
+			// Check if this is the dummy and cl_dummy_hammer is enabled
+			if(g_Config.m_ClDummyHammer)
+			{
+				Data.m_IsFireFireDetection = GameClient()->m_HammerInput.m_Fire & 1;
+			}
+			else
+			{
+				const auto &InputData = GameClient()->m_Controls.m_aInputData[!g_Config.m_ClDummy];
+				Data.m_IsFireFireDetection = InputData.m_Fire & 1;
+			}
+		}
+		else if(Client()->State() != IClient::STATE_DEMOPLAYBACK && pPlayerInfo->m_Local) // Always render local input when not in demo playback
+		{
+			const auto &InputData = GameClient()->m_Controls.m_aInputData[g_Config.m_ClDummy];
+			Data.m_IsFireFireDetection = InputData.m_Fire & 1;
+		}
+		else
+		{
+			// For other players, use attack tick to detect recent firing
+			// const auto &Character = GameClient()->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId];
+			// if(Character.m_Active)
+			// {
+			// 	// Show fire detection if player fired within the last few ticks
+			// 	// Use a threshold of 3 ticks (60ms at 50 tick rate) to account for network delay and weapon fire rates
+			// 	int TicksSinceAttack = Client()->GameTick(g_Config.m_ClDummy) - Character.m_Cur.m_AttackTick;
+			// 	Data.m_IsFireFireDetection = TicksSinceAttack >= 0 && TicksSinceAttack <= 3;
+			// }
+			// else
+			// {
+			// 	Data.m_IsFireFireDetection = 0;
+			// }
+			// if(pPlayerInfo->m_ClientId == g_Config.m_RiTestVar)
+			// {
+			// 	dbg_msg("Current tick", "%i", Client()->GameTick(g_Config.m_ClDummy));
+			// 	dbg_msg("Attacktick", "ClientID: %i, Attacktick: %i", pPlayerInfo->m_ClientId, Character.m_Cur.m_AttackTick);
+			// }
+			// if(Client()->GameTick(g_Config.m_ClDummy) == Character.m_Cur.m_AttackTick)
+			// 	Data.m_IsFireFireDetection = true;
+			Data.m_IsFireFireDetection = false;
+		}
+	}
+
+	int ShowHookDetecitonConfig = g_Config.m_RiShowHook;
+	Data.m_ShowHookDetection = false;
+	Data.m_IsHookHookDetection = false;
+	switch(ShowHookDetecitonConfig)
+	{
+	case 0: // Off
+		Data.m_ShowHookDetection = false;
+		break;
+	case 1: // Others
+		Data.m_ShowHookDetection = !pPlayerInfo->m_Local;
+		break;
+	case 2: // Everyone
+		Data.m_ShowHookDetection = true;
+		break;
+	case 3: // Only self
+		Data.m_ShowHookDetection = pPlayerInfo->m_Local;
+		break;
+	default:
+		dbg_assert(false, "ShowFireDetectionConfig invalid");
+		dbg_break();
+	}
+	if(Data.m_ShowHookDetection)
+	{
+		if(Client()->State() != IClient::STATE_DEMOPLAYBACK &&
+			pPlayerInfo->m_ClientId == GameClient()->m_aLocalIds[!g_Config.m_ClDummy])
+		{
+			// Check if this is the dummy and cl_dummy_control + cl_dummy_hook are enabled
+			if(g_Config.m_ClDummyControl && g_Config.m_ClDummyHook)
+			{
+				Data.m_IsHookHookDetection = GameClient()->m_DummyInput.m_Hook & 1;
+			}
+			else
+			{
+				const auto &InputData = GameClient()->m_Controls.m_aInputData[!g_Config.m_ClDummy];
+				Data.m_IsHookHookDetection = InputData.m_Hook & 1;
+			}
+		}
+		else if(Client()->State() != IClient::STATE_DEMOPLAYBACK && pPlayerInfo->m_Local) // Always render local input when not in demo playback
+		{
+			const auto &InputData = GameClient()->m_Controls.m_aInputData[g_Config.m_ClDummy];
+			Data.m_IsHookHookDetection = InputData.m_Hook & 1;
+		}
+		else
+		{
+			const auto &Character = GameClient()->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId];
+			Data.m_IsHookHookDetection = Character.m_Cur.m_HookState & 1;
+		}
+	}
+
+	Data.m_ShowRClientIndicator = false;
+	Data.m_IsUserRClientIndicator = false;
+	Data.m_ShowRClientIndicator = g_Config.m_RiShowRclientIndicator;
+	if(g_Config.m_RiShowRclientIndicator)
+	{
+		if(g_Config.m_RiRclientIndicatorAboveSelf)
+			Data.m_ShowRClientIndicator = g_Config.m_RiShowRclientIndicator;
+		else
+			Data.m_ShowRClientIndicator = !pPlayerInfo->m_Local;
+	}
+	if(Data.m_ShowRClientIndicator)
+	{
+		// Check if this player is using RClient
+		// Data.m_IsUserRClientIndicator = GameClient()->m_RClient.IsPlayerRClient(pPlayerInfo->m_ClientId);
+	}
+
+
 	// TClient
 	if(g_Config.m_TcWarList && g_Config.m_TcWarListShowClan && GameClient()->m_WarList.GetWarData(pPlayerInfo->m_ClientId).m_WarClan)
 		Data.m_ShowClan = true;
@@ -901,6 +1210,9 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 
 	const float FontSizeDirection = 18.0f + 20.0f * g_Config.m_ClDirectionSize / 100.0f;
 	const float FontSizeHookStrongWeak = 18.0f + 20.0f * g_Config.m_ClNamePlatesStrongSize / 100.0f;
+	const float FontSizeFireDetection = 18.0f + 20.0f * g_Config.m_RiFireDetectionSize / 100.0f;
+	const float FontSizeHookDetection = 18.0f + 20.0f * g_Config.m_RiHookDetectionSize / 100.0f;
+	const float FontSizeRClientIndicatorDetection = 18.0f + 20.0f * g_Config.m_RiRclientIndicatorSize / 100.0f;
 
 	CNamePlateData Data;
 
@@ -928,6 +1240,13 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	Data.m_ShowDirection = g_Config.m_ClShowDirection != 0 ? true : false;
 	Data.m_DirLeft = Data.m_DirJump = Data.m_DirRight = true;
 	Data.m_FontSizeDirection = FontSizeDirection;
+
+	Data.m_FontSizeFireDetection = FontSizeFireDetection;
+	Data.m_FontSizeHookDetection = FontSizeHookDetection;
+	Data.m_FontSizeRClientIndicator = FontSizeRClientIndicatorDetection;
+	Data.m_ShowFireDetection = g_Config.m_RiShowFire != 0 ? true : false;
+	Data.m_ShowHookDetection = g_Config.m_RiShowHook != 0 ? true : false;
+	Data.m_ShowRClientIndicator = g_Config.m_RiShowRclientIndicator != 0 ? true : false;
 
 	Data.m_FontSizeHookStrongWeak = FontSizeHookStrongWeak;
 	Data.m_HookStrongWeakId = Data.m_ClientId;
@@ -1028,3 +1347,14 @@ CNamePlates::~CNamePlates()
 {
 	delete m_pData;
 }
+
+void CNamePlates::RiResetNameplatesPos(CGameClient &This, const char *pScheme) const
+{
+	if(str_comp(g_Config.m_RiNamePlateScheme, "") != 0)
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+			m_pData->m_aNamePlates[i].ApplyNamePlateScheme(This, pScheme);
+	else
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+			m_pData->m_aNamePlates[i].ApplyDefaultNamePlateScheme(This);
+}
+

@@ -23,17 +23,17 @@ public:
 
 constexpr auto SAVES_FILE = "ddnet-saves.txt";
 
+enum
+{
+	MAX_LINES = 64,
+	MAX_LINE_LENGTH = 256
+};
+
 class CChat : public CComponent
 {
 	static constexpr float CHAT_HEIGHT_FULL = 200.0f;
 	static constexpr float CHAT_HEIGHT_MIN = 50.0f;
 	static constexpr float CHAT_FONTSIZE_WIDTH_RATIO = 2.5f;
-
-	enum
-	{
-		MAX_LINES = 64,
-		MAX_LINE_LENGTH = 256
-	};
 
 	CLineInputBuffered<MAX_LINE_LENGTH> m_Input;
 	class CLine
@@ -66,6 +66,9 @@ class CChat : public CComponent
 		int m_TimesRepeated;
 
 		std::shared_ptr<CTranslateResponse> m_pTranslateResponse;
+
+		// Animation: время появления строки для анимации выезда
+		int64_t m_AppearTime;
 	};
 
 	bool m_PrevScoreBoardShowed;
@@ -162,14 +165,20 @@ class CChat : public CComponent
 	static void ConchainChatFontSize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainChatWidth(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
-	bool LineShouldHighlight(const char *pLine, const char *pName);
 	void StoreSave(const char *pText);
 
 	friend class CBindChat;
 	friend class CTranslate;
 	friend class CTClient;
+	friend class CChatBubbles;
 
 public:
+
+	// Private helper method for filtering text
+	// const char* FilterText(const char* pMessage, int ClientId = -2, bool IsChat = false);
+
+	bool LineShouldHighlight(const char *pLine, const char *pName); //Rclient
+
 	CChat();
 	int Sizeof() const override { return sizeof(*this); }
 
@@ -222,5 +231,8 @@ public:
 	//
 	// It uses team or public chat depending on m_Mode.
 	void SendChatQueued(const char *pLine);
+
+	//Rcleint
+	bool LineHighlighted(int ClientId, const char *pLine);
 };
 #endif

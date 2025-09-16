@@ -1,0 +1,478 @@
+Settings
+== Настройки
+
+Bindwheel in spec
+== Колесо биндов в спеке
+
+Info
+== Информация
+
+Name:
+== Название
+
+Name
+== Название
+
+Command:
+== Команда
+
+Command
+== Команда
+
+Override Selected
+== Перезаписать выбранное
+
+Add Bind
+== Добавить бинд
+
+Remove Bind
+== Удалить бинд
+
+Use left mouse to select
+== Используйте левую кнопку мыши для выбора
+
+Use right mouse to swap with selected
+== Используйте правую кнопку мыши для обмена с выбранным
+
+Use middle mouse select without copy
+== Используйте среднюю кнопку мыши для выбора без копирования
+
+Rclient bindwheel settings
+== Настройки колеса биндов Rclient
+
+playernickname to enter nickname
+== playernickname чтобы ввести никнейм
+
+Do "playernickname" yourself in u need
+== Введите "playernickname" вручную, если нужно
+
+playerid to enter id
+== playerid чтобы ввести id
+
+Bind Wheel In Spec Key
+== Кнопка Колеса Биндов
+
+Reset position of mouse when opening bindwheel
+== Сброс позиции мыши при открытии колеса биндов
+
+Rushie Client Links
+== Ссылки Rushie Client
+
+Discord
+== Дискорд
+
+Website
+== Веб-сайт
+
+Config Files
+== Файлы конфигурации
+
+RClient Settings
+== Настройки RClient
+
+RClient Developer
+== Разработчик RClient
+
+Hide Settings Tabs
+== Скрыть вкладки настроек
+
+Bindwheel
+== Колесо биндов
+
+Unlock mouse in scoreboard
+== Разблокировать мышь в табло
+
+Tracker for spectating player
+== Трекер для наблюдаемого игрока
+
+Dummy pseudo
+== Дамми псевдо
+
+Deepfly
+== Дипфлай
+
+45° bind
+== 45° бинд
+
+Small sens bind
+== Бинд маленькой сенсы
+
+Left jump
+== Прыжок влево
+
+Right jump
+== Прыжок вправо
+
+Deepfly toggle
+== Вкл/выкл Дипфлай
+
+Auto Change Player Info
+== Авто смена информации о игроке
+
+[Chatbinds]
+Find skin
+== Найти скин
+
+[Chatbinds]
+Copy skin
+== Скопировать скин
+
+[Chatbinds]
+Find player
+== Найти игрока
+
+[Chatbinds]
+Copy player
+== Скопировать игрока
+
+[Chatbinds]
+Copy color
+== Скопировать цвет игрока
+
+[Chatbinds]
+Find skin from ddstats
+== Найти скин из базы DDStats
+
+[Chatbinds]
+Copy skin from ddstats
+== Скопировать скин из базы DDStats
+
+[Chatbinds]
+Find player from ddstats
+== Найти игрока из базы DDStats
+
+[Chatbinds]
+Copy player from ddstats
+== Скопировать игрока из базы DDStats
+
+[Chatbinds]
+Backup profile after copy
+== Бекап профиля после копирования
+
+Reset Find/Copy Skin/Player Chatbinds
+== Сбросить чатбинды для всех настроек "авто смены"
+
+Copy nick with dot or not(when copy player)
+== Копировать ник с точкой или нет(когда копируешь игрока)
+
+Auto change clan when dummy connect
+== Авто смена клана когда дамми подключен
+
+Clan with dummy:
+== Клан с дамми:
+
+Clan without dummy:
+== Клан без дамми:
+
+Chat Functions
+== Чат функции
+
+[Chatbinds]
+Find hours
+== Найти кол-во часов
+
+Add a word to the censor list
+== Добавить слово в цензурный список
+
+Find time on other map
+== Найти время на другой карте
+
+Search map info
+== Поиск информации о карте
+
+Reset Chat Chatbinds
+== Сбросить чатбинды "функций чата"
+
+Show blocked word in console
+== Показывать скрытые слова в консоль
+
+Blocked words console color
+== Цвет скрытых слов
+
+Enable word block list
+== Включить цензор лист
+
+Animate chat
+== Анимировать чат
+
+Anim chat ms
+== Время анимации в мс
+
+Movement
+== Передвижения
+
+Null movement/ Snap tap
+== Снап тап
+
+Scoreboard(Pulse)
+== Табло(Pulse)
+
+Reset mouse in scoreboard on untab
+== Сбрасывать мышь после выхода из табло
+
+Toggle mouse unlock in scoreboard
+== Переключать разблокирование мыши
+
+Player Indicator
+== Индикатор игроков
+
+Player indicator transparent toggle
+== Прозрачность индикатора вкл/выкл
+
+Indicator transparent start
+== Начало прозрачности индикатора
+
+Indicator transparent end
+== Конец прозрачности индикатора
+
+Indicator transparent minimum
+== Минимум прозрачности индикатора
+
+Changed Tater
+== Измененный TClient
+
+Pos x of Frozen hud
+== Позиция X дисплея замороженных тии
+
+Hide your chat bubble(without rcon)
+== Убрать свою чат эмоцию(Без ркона)
+
+Tracker Player
+== Трекер игрока
+
+Tracker player
+== Добавить игрока в трекер
+
+Tracker player reset
+== Сброса трекера игроков
+
+Tracker player remove
+== Убрать игрока из трекера
+
+Reset Tracker Chatbinds
+== Сбросить Чатбинды "Трекера"
+
+Show last known pos instead no info
+== Показывать последнию позицию вместо "no info"
+
+Change target pos x color when x target = x player
+== Менять цвет X позиции у цели трекера если на одной оси
+
+Change player pos x color when x target = x player
+== Менять цвет X позиции у игрока если на одной оси с целью трекера
+
+Add Hud Functions
+== Добавленные худ функции
+
+Friend heart size
+== Размер сердца друзей
+
+Friend heart position
+== Позиция сердца друзей
+
+Show milliseconds in timer
+== Показывать миллисекунды в таймере
+
+Show sleep emote in menu (ONLY CLIENT OTHER DON'T SEE THAT)
+== Показывать эмоцию сна в меню (Другие не видят это)
+
+Controls
+== Управление
+
+Toggle 45 degrees
+== Вкл/Выкл 45 градусов
+
+Toggle small sens
+== Вкл/Выкл маленькой сенсы
+
+Laser Settings(Pulse)
+== Настройки Лазера(Pulse)
+
+Enhanced Laser Effects
+== Улучшенные Эффекты Лазера
+
+Laser Glow Intensity
+== Интенсивность Лазерного Свечения
+
+Laser Preview
+== Превью Лазера
+
+Spectator
+== Наблюдатель
+
+Chat Bubbles(E-Client)
+== Чат-Баблы(E-Client)
+
+Show Chatbubbles above players
+== Показывать чат-баблы над игроками
+
+Chat Bubble Size
+== Размер чат-бабла
+
+Show the Bubbles for
+== Показывать баблы в течение
+
+fade in for
+== появление за
+
+fade out for
+== исчезновение за
+
+Discord RPC(E-Client)
+== Дискорд RPC (E-Client)
+
+Use Discord Rich Presence
+== Использовать Дискорд RPC
+
+Show What Map you're on
+== Показывать, на какой карте вы находитесь
+
+Online Message:
+== Сообщение онлайн:
+
+Offline Message:
+== Сообщение оффлайн:
+
+Multiple replacement char on blocked word len
+== Умножить замененный текст на длину заблокированного слова
+
+Replacement char
+== Текст для замены
+
+p=ping i=ignore m=ID n=name c=clan d=direction f=friend h=hook r=reason s=skin H=HookName F=FireName l=newline
+== p=пинг i=игнор m=ID n=имя c=клан d=направления f=друг h=хук r=причина s=скин H=хукнейм F=хаммернейм l=новая_строка
+
+[Nameplate_Editor]
+Nick
+== Ник
+
+[Nameplate_Editor]
+Ignore
+== Игнор
+
+[Nameplate_Editor]
+Skin
+== Скин
+
+[Nameplate_Editor]
+Dir
+== Напр
+
+[Nameplate_Editor]
+Friend
+== Друзья
+
+Nameplate Scheme
+== Схема Неймплейтов
+
+Current scheme:
+== Текущая схема:
+
+Preview:
+== Превью:
+
+Nameplate editor
+== Редактор Неймплейтов
+
+Show dummy
+== Показать дамми
+
+Reset to default
+== Сбросить к дефолтным
+
+Clear all
+== Очистить все
+
+[Nameplate_Editor]
+HookName
+== ХукНеймплейт
+
+[Nameplate_Editor]
+FireName
+== ХаммерНеймплейт
+
+Show you' fire presses
+== Показывать твой зажатый удар
+
+[Show players' key presses]
+Dummy
+== Дамми
+
+[Show players' key presses]
+Both
+== У обоих
+
+[Show players' key presses RC]
+Own
+== Свой
+
+Size of fire press icons
+== Размер иконки нажатия хаммера
+
+Show players' hook presses
+== Показывать зажатый хук игроков
+
+Size of hook press icons
+== Размер иконки нажатия хука
+
+Hook will change pos when some nearby
+== Хук будет менять позицию когда другая иконка рядом
+
+Fire will change pos when some nearby
+== Хаммер будет менять позицию когда другая иконка рядом
+
+To see that hold D and then hold A
+== Чтобы увидеть это зажми D потом A
+
+if you move away from the tee, the indicator will become more transparent
+== Если ты отойдешь от тии индикатор станет более прозрачным
+
+if no will be 'badbad->*' if yes 'badbad->******'
+== если нет, то будет "badbad->*", если да, то "badbad->******"
+
+Replacing blocked word with replacement char(badbad->******)
+== Замена заблокированного слова заменяющим символом(badbad->******)
+
+In console will be like 'tee said badbad'
+== В консоли будет что-то вроде 'tee said badbad'
+
+[RClient]
+Nameplates
+== Неймплейты
+
+Show Chatbubbles above you
+== Показывать чат-баблы над вами
+
+Show Chatbubbles in demo
+== Показывать чат-баблы в демо
+
+Show RClient User indicator
+== Показывать пользователей RClient
+
+Size of Rclient indicator icons
+== Размер индикатора RClient
+
+Indicator will change pos when some nearby
+== Индикатор будет менять позицию когда другая иконка рядом
+
+Show indicator above you
+== Показывать индикатор над тобой
+
+RClient User Indicator
+== Индикатор пользователя RClient
+
+[RClient]
+Dummy
+== Дамми
+
+Show Advanced Dummy Actions
+== Показывать улучшенные действия дамми
+
+Show Dummy position
+== Показывать позицию дамми
+
+Change dummy pos x color when x dummy = x player
+== Менять цвет X позиции у дамми если на одной оси с игроком
+
+Change player pos x color when x dummy = x player
+== Менять цвет X позиции у игрока если на одной оси с дамми

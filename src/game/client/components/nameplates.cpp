@@ -1348,6 +1348,18 @@ CNamePlates::~CNamePlates()
 	delete m_pData;
 }
 
+float CNamePlates::GetNamePlateOffset(int ClientId) const
+{
+	if(!m_pData || ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return 0.0f;
+
+	const CNamePlate &NamePlate = m_pData->m_aNamePlates[ClientId];
+	if(!NamePlate.IsInited())
+		return 0.0f;
+
+	return NamePlate.Size().y;
+}
+
 void CNamePlates::RiResetNameplatesPos(CGameClient &This, const char *pScheme) const
 {
 	if(str_comp(g_Config.m_RiNamePlateScheme, "") != 0)

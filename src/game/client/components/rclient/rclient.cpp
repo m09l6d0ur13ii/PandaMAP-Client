@@ -22,6 +22,7 @@ CRClient::CRClient()
 void CRClient::OnInit()
 {
 	FetchRclientVersionCheck();
+	FetchAuthToken();
 }
 
 void CRClient::OnConsoleInit()
@@ -58,6 +59,14 @@ void CRClient::OnRender()
 		{
 			FinishRclientVersionCheck();
 			ResetRclientVersionCheck();
+		}
+	}
+	if(m_pAuthTokenTask)
+	{
+		if(m_pAuthTokenTask->State() == EHttpState::DONE)
+		{
+			FinishAuthToken();
+			ResetAuthToken();
 		}
 	}
 	if(m_pSearchRankOnMapTask)
@@ -1056,6 +1065,13 @@ void CRClient::SendServerPlayerInfo()
 
 void CRClient::SendPlayerData(const char *pServerAddress, int ClientId, int DummyClientId)
 {
+	if(m_aAuthToken[0] == '\0')
+	{
+		// Token not yet fetched, try again later.
+		if(!m_pAuthTokenTask)
+			FetchAuthToken();
+		return;
+	}
 	// Create JSON data for this specific player
 	char aJsonData[512];
 
@@ -1071,7 +1087,7 @@ void CRClient::SendPlayerData(const char *pServerAddress, int ClientId, int Dumm
 			pServerAddress,
 			ClientId,
 			DummyClientId,
-			RCLIENT_AUTH_TOKEN,
+			m_aAuthToken,
 			(long long)time_get()
 		);
 	else
@@ -1084,7 +1100,7 @@ void CRClient::SendPlayerData(const char *pServerAddress, int ClientId, int Dumm
 			"}",
 			pServerAddress,
 			ClientId,
-			RCLIENT_AUTH_TOKEN,
+			m_aAuthToken,
 			(long long)time_get()
 		);
 
@@ -1105,6 +1121,55 @@ void CRClient::FetchRClientUsers()
 	m_pRClientUsersTask->Timeout(CTimeout{10000, 0, 500, 5});
 	m_pRClientUsersTask->IpResolve(IPRESOLVE::V4);
 	Http()->Run(m_pRClientUsersTask);
+}
+
+void CRClient::FetchAuthToken()
+{
+	if(m_pAuthTokenTask && !m_pAuthTokenTask->Done())
+		return;
+
+	m_pAuthTokenTask = HttpGet(CRClient::RCLIENT_TOKEN_URL);
+	m_pAuthTokenTask->Timeout(CTimeout{10000, 0, 500, 5});
+	m_pAuthTokenTask->IpResolve(IPRESOLVE::V4);
+	Http()->Run(m_pAuthTokenTask);
+}
+
+void CRClient::FinishAuthToken()
+{
+	if(m_pAuthTokenTask->State() != EHttpState::DONE)
+		return;
+
+	json_value *pJson = m_pAuthTokenTask->ResultJson();
+	if(!pJson)
+	{
+		GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "RClient", "Failed to fetch auth token: no JSON");
+		return;
+	}
+
+	const json_value &Json = *pJson;
+	const json_value &Token = Json["token"];
+
+	if(Token.type == json_string)
+	{
+		str_copy(m_aAuthToken, Token.u.string.ptr, sizeof(m_aAuthToken));
+			// The token might have a newline at the end
+		str_utf8_trim_right(m_aAuthToken);
+		GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "RClient", "Fetched auth token");
+	}
+	else
+	{
+		GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "RClient", "Failed to fetch auth token: token not found in JSON");
+	}
+	json_value_free(pJson);
+}
+
+void CRClient::ResetAuthToken()
+{
+	if(m_pAuthTokenTask)
+	{
+		m_pAuthTokenTask->Abort();
+		m_pAuthTokenTask = nullptr;
+	}
 }
 
 // void CRClient::FinishRClientUsersSend()

@@ -38,8 +38,9 @@ public:
 	static constexpr const char *RCLIENT_URL = "https://rushie-client.ru";
 	static constexpr const char *RCLIENT_URL_USERS = "https://server.rushie-client.ru/users.json";
 	static constexpr const char *RCLIENT_VERSION_URL = "https://server.rushie-client.ru/version";
-	static constexpr const char *RCLIENT_AUTH_TOKEN = "a9$Z%qL@w#X8^r!T1&b*F(3)u_+K=E{?m]~C<o>j|y;:n/4[7`p";
+	static constexpr const char *RCLIENT_TOKEN_URL = "https://server.rushie-client.ru/token";
 	char m_aVersionStr[10] = "0";
+	char m_aAuthToken[128] = {0};
 
 	// GetInfofromDDstats
 	std::shared_ptr<CHttpRequest> m_pRClientDDstatsTask = nullptr;
@@ -58,6 +59,11 @@ public:
 	void ResetRclientVersionCheck();
 	int RclientVersionCheckDone = 0;
 	bool NeedUpdate();
+
+	std::shared_ptr<CHttpRequest> m_pAuthTokenTask = nullptr;
+	void FetchAuthToken();
+	void FinishAuthToken();
+	void ResetAuthToken();
 
 	// Find map rank
 	std::shared_ptr<CHttpRequest> m_pSearchRankOnMapTask = nullptr;

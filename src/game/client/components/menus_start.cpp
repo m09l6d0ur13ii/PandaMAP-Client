@@ -221,8 +221,7 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 	CUIRect VersionUpdate;
 	MainView.HSplitBottom(20.0f, nullptr, &VersionUpdate);
 	VersionUpdate.VMargin(VMargin, &VersionUpdate);
-	const bool NeedUpdate = GameClient()->m_RClient.NeedUpdate();
-	if(NeedUpdate)
+	if(GameClient()->m_RClient.NeedUpdate())
 	{
 		CUIRect UpdateButton;
 		VersionUpdate.VSplitRight(100.0f, &VersionUpdate, &UpdateButton);

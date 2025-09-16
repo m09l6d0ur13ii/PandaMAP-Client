@@ -3485,8 +3485,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	MainView.HSplitBottom(20.0f, nullptr, &VersionUpdate);
 	const float VMargin = MainView.w / 2 - 150.0f;
 	VersionUpdate.VMargin(VMargin, &VersionUpdate);
-	const bool NeedUpdate = GameClient()->m_RClient.NeedUpdate();
-	if(NeedUpdate)
+	if(GameClient()->m_RClient.NeedUpdate())
 	{
 		CUIRect UpdateButton;
 		VersionUpdate.VSplitRight(100.0f, &VersionUpdate, &UpdateButton);

@@ -842,6 +842,13 @@ private:
 	void RenderSettingsTClientStatusBar(CUIRect MainView);
 	void RenderSettingsTClientProfiles(CUIRect MainView);
 
+	// Rushie
+	void RenderSettingsRushie(CUIRect MainView);
+	void RenderSettingsRushieSettings(CUIRect MainView);
+	void RenderSettingsRushieNameplatesEditor(CUIRect MainView);
+	void RenderSettingsRushieRCON(CUIRect MainView);
+	void RenderSettingsRushieInfo(CUIRect MainView);
+
 	const CWarType *m_pRemoveWarType = nullptr;
 	void PopupConfirmRemoveWarType();
 	void RenderDevSkin(vec2 RenderPos, float Size, const char *pSkinName, const char *pBackupSkin, bool CustomColors, int FeetColor, int BodyColor, int Emote, bool Rainbow,

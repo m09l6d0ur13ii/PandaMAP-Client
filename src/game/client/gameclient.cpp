@@ -1307,6 +1307,11 @@ void CGameClient::HandleLanguageChanged()
 	str_format(aBuf, sizeof(aBuf), "tclient/%s", g_Config.m_ClLanguagefile);
 	g_Localization.Load(aBuf, Storage(), Console(), false);
 
+	//Rclient
+	char aRCBuf[512];
+	str_format(aRCBuf, sizeof(aRCBuf), "rclient/%s", g_Config.m_ClLanguagefile);
+	g_Localization.Load(aRCBuf, Storage(), Console(), false);
+
 	TextRender()->SetFontLanguageVariant(g_Config.m_ClLanguagefile);
 
 	// Clear all text containers

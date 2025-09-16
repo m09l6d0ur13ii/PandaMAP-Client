@@ -1636,6 +1636,12 @@ set(EXPECTED_DATA
   menuimages/settings.png
   particles.png
   race_flag.png
+  rclient/languages/index.txt
+  rclient/languages/russian.txt
+  rclient/rclient_icon.png
+  rclient/riactions.png
+  rclient/rihammer.png
+  rclient/rihook.png
   shader/pipeline.frag
   shader/pipeline.vert
   shader/prim.frag
@@ -2178,6 +2184,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   config_domains.h
   config_includes.h
   config_variables.h
+  config_variables_rclient.h
   config_variables_tclient.h
   console.cpp
   console.h
@@ -2524,6 +2531,7 @@ if(CLIENT)
     components/players.h
     components/race_demo.cpp
     components/race_demo.h
+    components/rclient/menus_rclient.cpp
     components/scoreboard.cpp
     components/scoreboard.h
     components/skins.cpp

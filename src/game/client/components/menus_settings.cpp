@@ -1999,7 +1999,9 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("DDNet"),
 		Localize("Assets"),
 		TCLocalize("TClient"),
-		Localize("Profiles")};
+		Localize("Profiles"),
+		Localize("Rushie"),
+	};
 
 	static CButtonContainer s_aTabButtons[SETTINGS_LENGTH];
 
@@ -2073,6 +2075,11 @@ void CMenus::RenderSettings(CUIRect MainView)
 	{
 		GameClient()->m_MenuBackground.ChangePosition(14);
 		RenderSettingsTClientProfiles(MainView);
+	}
+	else if(g_Config.m_UiSettingsPage == SETTINGS_RUSHIE)
+	{
+		GameClient()->m_MenuBackground.ChangePosition(15);
+		RenderSettingsRushie(MainView);
 	}
 	else
 	{
@@ -3474,16 +3481,39 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 #endif
 
 	// Updater
+	CUIRect VersionUpdate;
+	MainView.HSplitBottom(20.0f, nullptr, &VersionUpdate);
+	const float VMargin = MainView.w / 2 - 150.0f;
+	VersionUpdate.VMargin(VMargin, &VersionUpdate);
+	const bool NeedUpdate = GameClient()->m_RClient.NeedUpdate();
+	if(NeedUpdate)
+	{
+		CUIRect UpdateButton;
+		VersionUpdate.VSplitRight(100.0f, &VersionUpdate, &UpdateButton);
+		VersionUpdate.VSplitRight(10.0f, &VersionUpdate, nullptr);
+
+		static CButtonContainer s_VersionUpdate;
+		if(GameClient()->m_Menus.DoButton_Menu(&s_VersionUpdate, Localize("Download"), 0, &UpdateButton, BUTTONFLAG_LEFT, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(1.0f, 0.2f, 0.2f, 0.25f)))
+		{
+			Client()->ViewLink(CRClient::RCLIENT_URL);
+		}
+
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), Localize("Rushie client %s is out!"), GameClient()->m_RClient.m_aVersionStr);
+		TextRender()->TextColor(1.0f, 0.2f, 0.2f, 1.0f);
+		Ui()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_ML);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+	}
 #if defined(CONF_AUTOUPDATE)
 	{
-		const bool NeedUpdate = GameClient()->m_TClient.NeedUpdate();
+		const bool NeedUpdate = GameClient()->m_RClient.NeedUpdate();
 		IUpdater::EUpdaterState State = Updater()->GetCurrentState();
 
 		// Update Button
 		char aBuf[256];
 		if(NeedUpdate && State <= IUpdater::CLEAN)
 		{
-			str_format(aBuf, sizeof(aBuf), Localize("TClient %s is available:"), GameClient()->m_TClient.m_aVersionStr);
+			str_format(aBuf, sizeof(aBuf), Localize("RClient %s is available:"), GameClient()->m_TClient.m_aVersionStr);
 			UpdaterRect.VSplitLeft(TextRender()->TextWidth(14.0f, aBuf, -1, -1.0f) + 10.0f, &UpdaterRect, &Button);
 			Button.VSplitLeft(100.0f, &Button, nullptr);
 			static CButtonContainer s_ButtonUpdate;
@@ -3496,7 +3526,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			str_copy(aBuf, Localize("Updating…"));
 		else if(State == IUpdater::NEED_RESTART)
 		{
-			str_copy(aBuf, Localize("TClient Client updated!"));
+			str_copy(aBuf, Localize("RClient Client updated!"));
 			m_NeedRestartUpdate = true;
 		}
 		else

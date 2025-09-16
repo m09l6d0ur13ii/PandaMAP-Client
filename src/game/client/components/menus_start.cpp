@@ -183,21 +183,31 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 	MainView.HSplitTop(15.0f, &TClientVersion, &MainView);
 	TClientVersion.VSplitRight(40.0f, &TClientVersion, nullptr);
 	char aTBuf[64];
+	char aRBuf[64];
 	str_format(aTBuf, sizeof(aTBuf), "TClient %s", TCLIENT_VERSION);
+	if(GameClient()->m_TClient.NeedUpdate())
+		TextRender()->TextColor(1.0f, 0.2f, 0.2f, 1.0f);
 	Ui()->DoLabel(&TClientVersion, aTBuf, 14.0f, TEXTALIGN_MR);
-#if defined(CONF_AUTOUPDATE)
-	CUIRect UpdateToDateText;
-	MainView.HSplitTop(15.0f, &UpdateToDateText, nullptr);
-	UpdateToDateText.VSplitRight(40.0f, &UpdateToDateText, nullptr);
-	if(!GameClient()->m_TClient.NeedUpdate() && GameClient()->m_TClient.m_FetchedTClientInfo)
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+
+	// Position RClient below TClient
 	{
-		Ui()->DoLabel(&UpdateToDateText, TCLocalize("(On Latest)"), 14.0f, TEXTALIGN_MR);
+		CUIRect RClientVersion;
+		MainView.HSplitTop(25.0f, &RClientVersion, nullptr);
+		RClientVersion.VSplitRight(42.5f, &RClientVersion, nullptr);
+		str_format(aRBuf, sizeof(aRBuf), "RClient %s", RCLIENT_VERSION);
+		if(GameClient()->m_RClient.NeedUpdate())
+			TextRender()->TextColor(1.0f, 0.2f, 0.2f, 1.0f);
+		Ui()->DoLabel(&RClientVersion, aRBuf, 14.0f, TEXTALIGN_MR);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
-	else
+
 	{
-		Ui()->DoLabel(&UpdateToDateText, TCLocalize("(Fetching Update Info)"), 14.0f, TEXTALIGN_MR);
+		CUIRect Version;
+		MainView.HSplitTop(40.0f, &Version, nullptr);
+		char aBuf[128] = "Based on Tater client. Thanks Pulse client for some functions";
+		Ui()->DoLabel(&Version, aBuf, 14.0f, TEXTALIGN_CENTER);
 	}
-#endif
 	static CButtonContainer s_ConsoleButton;
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
@@ -211,6 +221,25 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 	CUIRect VersionUpdate;
 	MainView.HSplitBottom(20.0f, nullptr, &VersionUpdate);
 	VersionUpdate.VMargin(VMargin, &VersionUpdate);
+	const bool NeedUpdate = GameClient()->m_RClient.NeedUpdate();
+	if(NeedUpdate)
+	{
+		CUIRect UpdateButton;
+		VersionUpdate.VSplitRight(100.0f, &VersionUpdate, &UpdateButton);
+		VersionUpdate.VSplitRight(10.0f, &VersionUpdate, nullptr);
+
+		static CButtonContainer s_VersionUpdate;
+		if(GameClient()->m_Menus.DoButton_Menu(&s_VersionUpdate, Localize("Download"), 0, &UpdateButton, BUTTONFLAG_LEFT, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(1.0f, 0.2f, 0.2f, 0.25f)))
+		{
+			Client()->ViewLink(CRClient::RCLIENT_URL);
+		}
+
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), Localize("Rushie client %s is out!"), GameClient()->m_RClient.m_aVersionStr);
+		TextRender()->TextColor(1.0f, 0.2f, 0.2f, 1.0f);
+		Ui()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_ML);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+	}
 #if defined(CONF_AUTOUPDATE)
 	CUIRect UpdateButton;
 	VersionUpdate.VSplitRight(100.0f, &VersionUpdate, &UpdateButton);
@@ -218,12 +247,12 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 
 	char aBuf[128];
 	const IUpdater::EUpdaterState State = Updater()->GetCurrentState();
-	const bool NeedUpdate = GameClient()->m_TClient.NeedUpdate();
+	const bool NeedUpdate = GameClient()->m_RClient.NeedUpdate();
 
 	if(State == IUpdater::CLEAN && NeedUpdate)
 	{
 		static CButtonContainer s_VersionUpdate;
-		if(GameClient()->m_Menus.DoButton_Menu(&s_VersionUpdate, Localize("Update now"), 0, &UpdateButton, BUTTONFLAG_LEFT, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+		if(GameClient()->m_Menus.DoButton_Menu(&s_VersionUpdate, Localize("Update now"), 0, &UpdateButton, BUTTONFLAG_LEFT, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(1.0f, 0.2f, 0.2f, 0.25f)))
 		{
 			Updater()->InitiateUpdate();
 		}
@@ -231,7 +260,7 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 	else if(State == IUpdater::NEED_RESTART)
 	{
 		static CButtonContainer s_VersionUpdate;
-		if(GameClient()->m_Menus.DoButton_Menu(&s_VersionUpdate, Localize("Restart"), 0, &UpdateButton, BUTTONFLAG_LEFT, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+		if(GameClient()->m_Menus.DoButton_Menu(&s_VersionUpdate, Localize("Restart"), 0, &UpdateButton, BUTTONFLAG_LEFT, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(1.0f, 0.2f, 0.2f, 0.25f)))
 		{
 			Client()->Restart();
 		}
@@ -243,8 +272,8 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 
 	if(State == IUpdater::CLEAN && NeedUpdate)
 	{
-		str_format(aBuf, sizeof(aBuf), Localize("TClient %s is out!"), GameClient()->m_TClient.m_aVersionStr);
-		TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
+		str_format(aBuf, sizeof(aBuf), Localize("Rushie client %s is out!"), GameClient()->m_RClient.m_aVersionStr);
+		TextRender()->TextColor(1.0f, 0.2f, 0.2f, 1.0f);
 	}
 	else if(State == IUpdater::CLEAN)
 	{

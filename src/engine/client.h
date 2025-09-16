@@ -306,6 +306,7 @@ public:
 
 	virtual void GenerateTimeoutSeed() = 0;
 
+	virtual IFriends *Friends() = 0;
 	virtual IFriends *Foes() = 0;
 
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
@@ -349,6 +350,9 @@ public:
 
 	// TClient
 	bool m_IsLocalFrozen = false;
+
+	// RClient
+	virtual void DiscordRPCchange() = 0;
 };
 
 class IGameClient : public IInterface
@@ -377,6 +381,7 @@ public:
 	virtual int OnSnapInput(int *pData, bool Dummy, bool Force) = 0;
 	virtual void OnDummySwap() = 0;
 	virtual void SendDummyInfo(bool Start) = 0;
+	virtual void SendInfo(bool Start) = 0;
 
 	virtual const char *GetItemName(int Type) const = 0;
 	virtual const char *Version() const = 0;

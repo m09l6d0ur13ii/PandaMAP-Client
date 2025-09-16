@@ -136,6 +136,12 @@ void CBindChat::ConBindchatDefaults(IConsole::IResult *pResult, void *pUserData)
 {
 	CBindChat *pThis = static_cast<CBindChat *>(pUserData);
 
+	for(const CBindRclient &BindDefault : s_aDefaultBindChatRclientFindSkin)
+		pThis->AddBind(BindDefault.m_Bind);
+	for(const CBindRclient &BindDefault : s_aDefaultBindChatRclientChat)
+		pThis->AddBind(BindDefault.m_Bind);
+	for(const CBindRclient &BindDefault : s_aDefaultBindChatRclientTracker)
+		pThis->AddBind(BindDefault.m_Bind);
 	for(const auto &[_, vBindDefaults] : CBindChat::BIND_DEFAULTS)
 		for(const CBindChat::CBindDefault &BindDefault : vBindDefaults)
 			pThis->AddBind(BindDefault.m_Bind);

@@ -566,12 +566,14 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		}
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_UP)
 		{
-			m_BacklogCurLine += GetLinesToScroll(-1, 1);
+			int scrollAmount = m_pGameConsole->Input()->ModifierIsPressed() ? 5 : 1; // 5 строк если Ctrl, иначе 1
+			m_BacklogCurLine += GetLinesToScroll(-1, scrollAmount);
 			Handled = true;
 		}
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
 		{
-			--m_BacklogCurLine;
+			int scrollAmount = m_pGameConsole->Input()->ModifierIsPressed() ? 5 : 1;
+			m_BacklogCurLine -= scrollAmount;
 			if(m_BacklogCurLine < 0)
 			{
 				m_BacklogCurLine = 0;

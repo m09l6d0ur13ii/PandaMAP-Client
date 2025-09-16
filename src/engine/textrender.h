@@ -70,6 +70,10 @@ namespace FontIcons {
 [[maybe_unused]] static const char *FONT_ICON_LOCK = "\xEF\x80\xA3";
 [[maybe_unused]] static const char *FONT_ICON_MAGNIFYING_GLASS = "\xEF\x80\x82";
 [[maybe_unused]] static const char *FONT_ICON_HEART = "\xEF\x80\x84";
+[[maybe_unused]] static const char *FONT_ICON_HEART_CRACK = "\xEF\x9E\xA9";
+[[maybe_unused]] static const char *FONT_ICON_LIST_TRACK = "\xEF\x80\xBA";
+[[maybe_unused]] static const char *FONT_ICON_PEOPLE_GROUP = "\xEE\x94\xB3";
+[[maybe_unused]] static const char *FONT_ICON_PERSON_RIFLE = "\xEE\x95\x8E";
 [[maybe_unused]] static const char *FONT_ICON_STAR = "\xEF\x80\x85";
 [[maybe_unused]] static const char *FONT_ICON_XMARK = "\xEF\x80\x8D";
 [[maybe_unused]] static const char *FONT_ICON_CIRCLE = "\xEF\x84\x91";
@@ -157,6 +161,10 @@ namespace FontIcons {
 [[maybe_unused]] static const char *FONT_ICON_QUESTION = "?";
 
 [[maybe_unused]] static const char *FONT_ICON_CAMERA = "\xEF\x80\xB0";
+
+[[maybe_unused]] static const char *FONT_ICON_GAVEL = "\xEF\x83\xA3";
+[[maybe_unused]] static const char *FONT_ICON_DOOR_OPEN = "\xEF\x94\xAB";
+[[maybe_unused]] static const char *FONT_ICON_SCULL = "\xEF\x95\x8C";
 } // end namespace FontIcons
 
 enum ETextCursorSelectionMode
@@ -339,6 +347,9 @@ public:
 
 	virtual void OnPreWindowResize() = 0;
 	virtual void OnWindowResize() = 0;
+
+	virtual void ColorParsing(const char *pText, CTextCursor *pCursor, ColorRGBA OriginalCol, STextContainerIndex *pTextContainerIndex = nullptr) = 0;
+	virtual ColorRGBA HSVtoRGB(float h, float s, float v) = 0;
 };
 
 class IEngineTextRender : public ITextRender

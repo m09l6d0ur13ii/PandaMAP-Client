@@ -3764,6 +3764,11 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 	case TIME_MINS:
 		return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64, centisecs / min,
 			(centisecs % min) / sec);
+	case TIME_DAYS_CENTISECS:
+		if(centisecs >= day)
+			return str_format(buffer, buffer_size, "%" PRId64 "d %02" PRId64 ":%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / day,
+				(centisecs % day) / hour, (centisecs % hour) / min, (centisecs % min) / sec, centisecs % sec);
+		[[fallthrough]];
 	case TIME_HOURS_CENTISECS:
 		if(centisecs >= hour)
 			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / hour,
@@ -3775,7 +3780,7 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 				(centisecs % min) / sec, centisecs % sec);
 		[[fallthrough]];
 	case TIME_SECS_CENTISECS:
-		return str_format(buffer, buffer_size, "%02" PRId64 ".%02" PRId64, (centisecs % min) / sec, centisecs % sec);
+		return str_format(buffer, buffer_size, "00:%02" PRId64 ".%02" PRId64, (centisecs % min) / sec, centisecs % sec);
 	}
 
 	return -1;

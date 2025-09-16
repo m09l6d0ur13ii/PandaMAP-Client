@@ -175,13 +175,16 @@ bool CSpectator::OnInput(const IInput::CEvent &Event)
 		if(GameClient()->m_Snap.m_SpecInfo.m_Active && !IsActive() && !GameClient()->m_MultiViewActivated &&
 			!Ui()->IsPopupOpen() && !GameClient()->m_GameConsole.IsActive() && !GameClient()->m_Menus.IsActive())
 		{
-			if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_MOUSE_1)
+			if(!GameClient()->m_AdminPanelRi.IsActivePopup() && !GameClient()->m_AdminPanelRi.IsActivePlrList())
 			{
-				if(GameClient()->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
-					Spectate(SPEC_FREEVIEW);
-				else
-					SpectateClosest();
-				return true;
+				if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_MOUSE_1)
+				{
+					if(GameClient()->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
+						Spectate(SPEC_FREEVIEW);
+					else
+						SpectateClosest();
+					return true;
+				}
 			}
 		}
 	}

@@ -255,7 +255,7 @@ void CInfoMessages::OnKillMessage(const CNetMsg_Sv_KillMsg *pMsg)
 		Kill.m_TeamSize = 1;
 		Kill.m_aVictimIds[0] = pMsg->m_Victim;
 		Kill.m_VictimDDTeam = GameClient()->m_Teams.Team(Kill.m_aVictimIds[0]);
-		str_copy(Kill.m_aVictimName, GameClient()->m_aClients[Kill.m_aVictimIds[0]].m_aName);
+		str_copy(Kill.m_aVictimName, GameClient()->m_Chat.FilterText(GameClient()->m_aClients[Kill.m_aVictimIds[0]].m_aName));
 		Kill.m_apVictimManagedTeeRenderInfos[0] = GameClient()->CreateManagedTeeRenderInfo(GameClient()->m_aClients[Kill.m_aVictimIds[0]]);
 	}
 
@@ -290,7 +290,7 @@ void CInfoMessages::OnRaceFinishMessage(const CNetMsg_Sv_RaceFinish *pMsg)
 	Finish.m_TeamSize = 1;
 	Finish.m_aVictimIds[0] = pMsg->m_ClientId;
 	Finish.m_VictimDDTeam = GameClient()->m_Teams.Team(Finish.m_aVictimIds[0]);
-	str_copy(Finish.m_aVictimName, GameClient()->m_aClients[Finish.m_aVictimIds[0]].m_aName);
+	str_copy(Finish.m_aVictimName, GameClient()->m_Chat.FilterText(GameClient()->m_aClients[Finish.m_aVictimIds[0]].m_aName));
 	Finish.m_apVictimManagedTeeRenderInfos[0] = GameClient()->CreateManagedTeeRenderInfo(GameClient()->m_aClients[pMsg->m_ClientId]);
 
 	Finish.m_Diff = pMsg->m_Diff;

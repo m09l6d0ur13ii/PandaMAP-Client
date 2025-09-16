@@ -447,14 +447,36 @@ void CClient::SetState(EClientState State)
 		CServerInfo CurrentServerInfo;
 		GetServerInfo(&CurrentServerInfo);
 
-		Discord()->SetGameInfo(CurrentServerInfo, m_aCurrentMap, Registered);
 		Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, Registered);
 	}
 	else if(OldState == IClient::STATE_ONLINE)
 	{
-		Discord()->ClearGameInfo();
 		Steam()->ClearGameInfo();
 	}
+	DiscordRPCchange();
+}
+
+void CClient::ConDiscordRPCchange(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pSelf->DiscordRPCchange();
+}
+
+void CClient::DiscordRPCchange()
+{
+	if(State() == IClient::STATE_ONLINE)
+	{
+		const bool Registered = m_ServerBrowser.IsRegistered(ServerAddress());
+		CServerInfo CurrentServerInfo;
+		GetServerInfo(&CurrentServerInfo);
+
+		Discord()->SetGameInfo(CurrentServerInfo, m_aCurrentMap, g_Config.m_RiDiscordOnlineStatus, g_Config.m_RiDiscordMapStatus, Registered);
+	}
+	else if(State() == IClient::STATE_OFFLINE)
+	{
+		Discord()->ClearGameInfo(g_Config.m_RiDiscordOfflineStatus);
+	}
+	dbg_msg("RClient", "Discord RPC reloaded");
 }
 
 // called when the map is loaded and we should init for a new round
@@ -803,6 +825,12 @@ void CClient::DummyConnect()
 		m_aNetClient[CONN_DUMMY].Connect(m_aNetClient[CONN_MAIN].ServerAddress(), 1);
 
 	m_aGametimeMarginGraphs[CONN_DUMMY].Init(-150.0f, 150.0f);
+	if(g_Config.m_PlayerClanAutoChange)
+	{
+		IGameClient *pGameClient = m_pGameClient;
+		str_copy(g_Config.m_PlayerClan, g_Config.m_PlayerClanWithDummy, sizeof(g_Config.m_PlayerClan));
+		pGameClient->SendInfo(false);
+	}
 }
 
 void CClient::DummyDisconnect(const char *pReason)
@@ -818,6 +846,12 @@ void CClient::DummyDisconnect(const char *pReason)
 	m_DummyConnecting = false;
 	m_DummyReconnectOnReload = false;
 	m_DummyDeactivateOnReconnect = false;
+	if(g_Config.m_PlayerClanAutoChange)
+	{
+		IGameClient *pGameClient = m_pGameClient;
+		str_copy(g_Config.m_PlayerClan, g_Config.m_PlayerClanNoDummy, sizeof(g_Config.m_PlayerClan));
+		pGameClient->SendInfo(false);
+	}
 	GameClient()->OnDummyDisconnect();
 }
 
@@ -1421,7 +1455,8 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			{
 				m_CurrentServerInfo = Info;
 				m_CurrentServerInfoRequestTime = -1;
-				Discord()->UpdateServerInfo(Info, m_aCurrentMap);
+				if(g_Config.m_TcDiscordRPC)
+					Discord()->UpdateServerInfo(Info, m_aCurrentMap);
 			}
 
 			bool ValidPong = false;
@@ -3025,7 +3060,7 @@ void CClient::Update()
 	else
 		GameClient()->OnUpdate();
 
-	Discord()->Update();
+	Discord()->Update(g_Config.m_TcDiscordRPC);
 	Steam()->Update();
 	if(Steam()->GetConnectAddress())
 	{
@@ -3073,7 +3108,8 @@ void CClient::InitInterfaces()
 #if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
-	m_pDiscord = Kernel()->RequestInterface<IDiscord>();
+	if(g_Config.m_TcDiscordRPC)
+		m_pDiscord = Kernel()->RequestInterface<IDiscord>();
 	m_pSteam = Kernel()->RequestInterface<ISteam>();
 	m_pNotifications = Kernel()->RequestInterface<INotifications>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -4900,7 +4936,7 @@ int main(int argc, const char **argv)
 	pKernel->RegisterInterface(pEngineMap); // IEngineMap
 	pKernel->RegisterInterface(static_cast<IMap *>(pEngineMap), false);
 
-	IDiscord *pDiscord = CreateDiscord(!g_Config.m_TcDiscordRPC);
+	IDiscord *pDiscord = CreateDiscord();
 	pKernel->RegisterInterface(pDiscord);
 
 	ISteam *pSteam = CreateSteam();

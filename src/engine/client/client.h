@@ -140,6 +140,10 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_aCodeRunAfterJoinConsole[NUM_DUMMIES] = {false, false};
 	bool m_GenerateTimeoutSeed = true;
 
+	//Rclient
+	static void ConDiscordRPCchange(IConsole::IResult *pResult, void *pUserData);
+	void DiscordRPCchange() override;
+
 	// TClient
 	std::array<bool, NUM_DUMMIES> m_aExecuteOnJoinDone = {};
 
@@ -521,7 +525,7 @@ public:
 	virtual void SaveReplay(int Length, const char *pFilename = "");
 
 	bool EditorHasUnsavedData() const override { return m_pEditor->HasUnsavedData(); }
-
+	IFriends *Friends() override { return &m_Friends; }
 	IFriends *Foes() override { return &m_Foes; }
 
 	void GetSmoothFreezeTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) override;

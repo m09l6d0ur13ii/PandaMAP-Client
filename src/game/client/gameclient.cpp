@@ -10,12 +10,14 @@
 #include <engine/discord.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
+#include <engine/external/json-parser/json.h>
 #include <engine/favorites.h>
 #include <engine/friends.h>
 #include <engine/graphics.h>
 #include <engine/map.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
+#include <engine/shared/http.h>
 #include <engine/sound.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
@@ -140,14 +142,14 @@ void CGameClient::OnConsoleInit()
 					      &m_Translate,
 					      &m_Ghost,
 					      &m_TClient,
-					      // &m_RClient,// Must be before chat and players
+					      &m_RClient,// Must be before chat and players
 					      &m_Players,
 					      &m_MapLayersForeground,
 					      &m_Outlines,
 					      &m_Pet,
 					      &m_Particles.m_RenderExplosions,
 					      &m_NamePlates,
-					      // &m_ChatBubbles, // E-Client
+					      &m_ChatBubbles, // E-Client
 					      &m_Particles.m_RenderExtra,
 					      &m_Particles.m_RenderGeneral,
 					      &m_FreezeBars,
@@ -167,7 +169,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Broadcast,
 					      &m_DebugHud,
 					      &m_TouchControls,
-					      // &m_AdminPanelRi,
+					      &m_AdminPanelRi,
 					      &m_Scoreboard,
 					      &m_Statboard,
 					      &m_Motd,
@@ -183,7 +185,7 @@ void CGameClient::OnConsoleInit()
 						  &m_Binds.m_SpecialBinds,
 						  &m_GameConsole,
 						  &m_Chat,	// chat has higher prio, due to that you can quit it by pressing esc
-						  // &m_AdminPanelRi,
+						  &m_AdminPanelRi,
 						  &m_Scoreboard,
 						  &m_Motd, // for pressing esc to remove it
 						  &m_Spectator,
@@ -205,15 +207,15 @@ void CGameClient::OnConsoleInit()
 
 	// add basic console commands
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
-	// Console()->Register("find_skin", "r[player]", CFGFLAG_CLIENT, ConFindSkin, this, "Find skin");
-	// Console()->Register("copy_skin", "r[player]", CFGFLAG_CLIENT, ConCopySkin, this, "Copy skin");
-	// Console()->Register("find_player", "r[player]", CFGFLAG_CLIENT, ConFindPlayer, this, "Find Player");
-	// Console()->Register("copy_player", "r[player]", CFGFLAG_CLIENT, ConCopyPlayer, this, "Copy Player");
-	// Console()->Register("copy_color", "r[player]", CFGFLAG_CLIENT, ConCopyColor, this, "Copy Color skin");
-	// Console()->Register("tracker", "r[player]", CFGFLAG_CLIENT, ConTargetPlayerPos, this, "Track player pos");
-	// Console()->Register("tracker_reset", "", CFGFLAG_CLIENT, ConTargetPlayerPosReset, this, "Reset tracker pos");
-	// Console()->Register("tracker_remove", "r[player]", CFGFLAG_CLIENT, ConTargetPlayerPosRemove, this, "Remove tracker pos of player");
-	// Console()->Register("add_censor_list", "r[word]", CFGFLAG_CLIENT, ConAddCensorList, this, "Reset tracker pos");
+	Console()->Register("find_skin", "r[player]", CFGFLAG_CLIENT, ConFindSkin, this, "Find skin");
+	Console()->Register("copy_skin", "r[player]", CFGFLAG_CLIENT, ConCopySkin, this, "Copy skin");
+	Console()->Register("find_player", "r[player]", CFGFLAG_CLIENT, ConFindPlayer, this, "Find Player");
+	Console()->Register("copy_player", "r[player]", CFGFLAG_CLIENT, ConCopyPlayer, this, "Copy Player");
+	Console()->Register("copy_color", "r[player]", CFGFLAG_CLIENT, ConCopyColor, this, "Copy Color skin");
+	Console()->Register("tracker", "r[player]", CFGFLAG_CLIENT, ConTargetPlayerPos, this, "Track player pos");
+	Console()->Register("tracker_reset", "", CFGFLAG_CLIENT, ConTargetPlayerPosReset, this, "Reset tracker pos");
+	Console()->Register("tracker_remove", "r[player]", CFGFLAG_CLIENT, ConTargetPlayerPosRemove, this, "Remove tracker pos of player");
+	Console()->Register("add_censor_list", "r[word]", CFGFLAG_CLIENT, ConAddCensorList, this, "Reset tracker pos");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself to restart");
 	Console()->Register("ready_change", "", CFGFLAG_CLIENT, ConReadyChange7, this, "Change ready state (0.7 only)");
 
@@ -326,6 +328,10 @@ void CGameClient::InitializeLanguage()
 	// TClient
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "tclient/%s", g_Config.m_ClLanguagefile);
+	g_Localization.Load(aBuf, Storage(), Console(), false);
+
+	// RClient
+	str_format(aBuf, sizeof(aBuf), "rclient/%s", g_Config.m_ClLanguagefile);
 	g_Localization.Load(aBuf, Storage(), Console(), false);
 }
 
@@ -446,6 +452,7 @@ void CGameClient::OnInit()
 			g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i].m_pFilename, IStorage::TYPE_ALL);
 		m_Menus.RenderLoading(pLoadingDDNetCaption, pLoadingMessageAssets, 1);
 	}
+	LoadRiHudSkin("default");
 
 	m_GameWorld.m_pCollision = Collision();
 	m_GameWorld.m_pTuningList = m_aTuningList;
@@ -613,7 +620,13 @@ void CGameClient::OnConnected()
 	m_Collision.Init(Layers());
 	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 	m_RaceHelper.Init(this);
-
+	// Initialize all slots to -1 to mark them as free
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		m_RClient.TargetPositionId[i] = -1;
+		m_RClient.TargetPositionNickname[i][0] = '\0';
+	}
+	m_RClient.TargetCount = 0;
 	// render loading before going through all components
 	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0);
 	for(auto &pComponent : m_vpAll)
@@ -624,6 +637,11 @@ void CGameClient::OnConnected()
 
 	ConfigManager()->ResetGameSettings();
 	LoadMapSettings();
+
+	if(g_Config.m_PlayerClanAutoChange)
+	{
+		str_copy(g_Config.m_PlayerClan, g_Config.m_PlayerClanNoDummy, sizeof(g_Config.m_PlayerClan));
+	}
 
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
@@ -3426,6 +3444,659 @@ void CGameClient::ConTeam(IConsole::IResult *pResult, void *pUserData)
 	((CGameClient *)pUserData)->SendSwitchTeam(pResult->GetInteger(0));
 }
 
+void CGameClient::ConFindSkin(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	const char *pInput = pResult->GetString(0);
+	char aInput[256];
+	str_copy(aInput, pInput, sizeof(aInput));
+	str_utf8_trim_right(aInput);
+	int ClientID = -1;
+	// First try to find by name
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(str_comp_nocase(pSelf->m_aClients[i].m_aName, aInput) == 0)
+		{
+			ClientID = i;
+			break;
+		}
+	}
+
+	// If not found by name, try to use input as ID
+	if(ClientID == -1)
+	{
+		ClientID = str_toint(aInput);
+	}
+	// Validate client ID
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+	{
+		const CGameClient::CClientData &ClientData = pSelf->m_aClients[ClientID];
+		if(ClientData.m_aSkinName[0])
+		{
+			char aBuf[512];
+
+			// Базовая информация о скине
+			str_format(aBuf, sizeof(aBuf), "Skin info for client %d:\n", ClientID);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			str_format(aBuf, sizeof(aBuf), "- Name: %s", ClientData.m_aName);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Название скина
+			str_format(aBuf, sizeof(aBuf), "- Skin Name: %s", ClientData.m_aSkinName);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Цвет тела
+			str_format(aBuf, sizeof(aBuf), "- Body Color: %d",
+				ClientData.m_ColorBody);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Цвет ног
+			str_format(aBuf, sizeof(aBuf), "- Feet Color: %d",
+				ClientData.m_ColorFeet);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Включены ли кастом цвет
+			str_format(aBuf, sizeof(aBuf), "- Custom Color: %d",
+				ClientData.m_UseCustomColor);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+		}
+		else
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "No skin found for this client");
+		}
+	}
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "Invalid client ID");
+		pSelf->Echo("No that player on server");
+	}
+}
+
+void CGameClient::ConCopySkin(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	const char *pInput = pResult->GetString(0);
+	char aInput[256];
+	str_copy(aInput, pInput, sizeof(aInput));
+	str_utf8_trim_right(aInput);
+	int ClientID = -1;
+	// First try to find by name
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(str_comp_nocase(pSelf->m_aClients[i].m_aName, aInput) == 0)
+		{
+			ClientID = i;
+			break;
+		}
+	}
+
+	// If not found by name, try to use input as ID
+	if(ClientID == -1)
+	{
+		ClientID = str_toint(aInput);
+	}
+
+	// Validate client ID
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+	{
+		const CGameClient::CClientData &ClientData = pSelf->m_aClients[ClientID];
+		if(ClientData.m_aSkinName[0])
+		{
+			char aBuf[512];
+
+			// Базовая информация о скине
+			str_format(aBuf, sizeof(aBuf), "Skin info for client %d:\n", ClientID);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			str_format(aBuf, sizeof(aBuf), "- Name: %s", ClientData.m_aName);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Название скина
+			str_format(aBuf, sizeof(aBuf), "- Skin Name: %s", ClientData.m_aSkinName);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Цвет тела
+			str_format(aBuf, sizeof(aBuf), "- Body Color: %d",
+				ClientData.m_ColorBody);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Цвет ног
+			str_format(aBuf, sizeof(aBuf), "- Feet Color: %d",
+				ClientData.m_ColorFeet);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Включены ли кастом цвет
+			str_format(aBuf, sizeof(aBuf), "- Custom Color: %d",
+				ClientData.m_UseCustomColor);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			if(g_Config.m_ClDummy == 1)
+			{
+				str_copy(pSelf->m_RClient.DummySkinBeforeCopyPlayer, g_Config.m_ClDummySkin, sizeof(pSelf->m_RClient.DummySkinBeforeCopyPlayer));
+				str_copy(pSelf->m_RClient.DummyNameBeforeCopyPlayer, g_Config.m_ClDummyName, sizeof(pSelf->m_RClient.DummyNameBeforeCopyPlayer));
+				str_copy(pSelf->m_RClient.DummyClanBeforeCopyPlayer, g_Config.m_ClDummyClan, sizeof(pSelf->m_RClient.DummyClanBeforeCopyPlayer));
+				pSelf->m_RClient.DummyUseCustomColorBeforeCopyPlayer = g_Config.m_ClDummyUseCustomColor;
+				pSelf->m_RClient.DummyBodyColorBeforeCopyPlayer = g_Config.m_ClDummyColorBody;
+				pSelf->m_RClient.DummyFeetColorBeforeCopyPlayer = g_Config.m_ClDummyColorFeet;
+				pSelf->m_RClient.DummyCountryBeforeCopyPlayer = g_Config.m_ClDummyCountry;
+				str_copy(g_Config.m_ClDummySkin, ClientData.m_aSkinName, sizeof(g_Config.m_ClDummySkin));
+				g_Config.m_ClDummyUseCustomColor = ClientData.m_UseCustomColor;
+				g_Config.m_ClDummyColorBody = ClientData.m_ColorBody;
+				g_Config.m_ClDummyColorFeet = ClientData.m_ColorFeet;
+				pSelf->SendDummyInfo(false);
+			}
+			if(g_Config.m_ClDummy == 0)
+			{
+				str_copy(pSelf->m_RClient.PlayerSkinBeforeCopyPlayer, g_Config.m_ClPlayerSkin, sizeof(pSelf->m_RClient.PlayerSkinBeforeCopyPlayer));
+				str_copy(pSelf->m_RClient.PlayerNameBeforeCopyPlayer, g_Config.m_PlayerName, sizeof(pSelf->m_RClient.PlayerNameBeforeCopyPlayer));
+				str_copy(pSelf->m_RClient.PlayerClanBeforeCopyPlayer, g_Config.m_PlayerClan, sizeof(pSelf->m_RClient.PlayerClanBeforeCopyPlayer));
+				pSelf->m_RClient.PlayerUseCustomColorBeforeCopyPlayer = g_Config.m_ClPlayerUseCustomColor;
+				pSelf->m_RClient.PlayerBodyColorBeforeCopyPlayer = g_Config.m_ClPlayerColorBody;
+				pSelf->m_RClient.PlayerFeetColorBeforeCopyPlayer = g_Config.m_ClPlayerColorFeet;
+				pSelf->m_RClient.PlayerCountryBeforeCopyPlayer = g_Config.m_PlayerCountry;
+				str_copy(g_Config.m_ClPlayerSkin, ClientData.m_aSkinName, sizeof(g_Config.m_ClPlayerSkin));
+				g_Config.m_ClPlayerUseCustomColor = ClientData.m_UseCustomColor;
+				g_Config.m_ClPlayerColorBody = ClientData.m_ColorBody;
+				g_Config.m_ClPlayerColorFeet = ClientData.m_ColorFeet;
+				pSelf->SendInfo(false);
+			}
+		}
+		else
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "No skin found for this client");
+		}
+	}
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "Invalid client ID");
+		pSelf->Echo("No that player on server");
+	}
+}
+
+void CGameClient::ConCopyPlayer(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	const char *pInput = pResult->GetString(0);
+	char aInput[256];
+	str_copy(aInput, pInput, sizeof(aInput));
+	str_utf8_trim_right(aInput);
+	int ClientID = -1;
+	// First try to find by name
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(str_comp_nocase(pSelf->m_aClients[i].m_aName, aInput) == 0)
+		{
+			ClientID = i;
+			break;
+		}
+	}
+
+	// If not found by name, try to use input as ID
+	if(ClientID == -1)
+	{
+		ClientID = str_toint(aInput);
+	}
+
+	// Validate client ID
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+	{
+		const CGameClient::CClientData &ClientData = pSelf->m_aClients[ClientID];
+		if(ClientData.m_aSkinName[0])
+		{
+			char aBuf[512];
+
+			// Базовая информация о скине
+			str_format(aBuf, sizeof(aBuf), "Skin info for client %d:\n", ClientID);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Название скина
+			str_format(aBuf, sizeof(aBuf), "- Skin name: %s", ClientData.m_aSkinName);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Цвет тела
+			str_format(aBuf, sizeof(aBuf), "- Body Color: %d",
+				ClientData.m_ColorBody);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Цвет ног
+			str_format(aBuf, sizeof(aBuf), "- Feet Color: %d",
+				ClientData.m_ColorFeet);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Включены ли кастом цвет
+			str_format(aBuf, sizeof(aBuf), "- Custom Color: %d",
+				ClientData.m_UseCustomColor);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			str_format(aBuf, sizeof(aBuf), "- Name: %s", ClientData.m_aName);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			str_format(aBuf, sizeof(aBuf), "- Clan: %s", ClientData.m_aClan);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			str_format(aBuf, sizeof(aBuf), "- Country: %d",
+				ClientData.m_Country);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			if(g_Config.m_ClDummy == 1)
+			{
+				str_copy(pSelf->m_RClient.DummySkinBeforeCopyPlayer, g_Config.m_ClDummySkin, sizeof(pSelf->m_RClient.DummySkinBeforeCopyPlayer));
+				str_copy(pSelf->m_RClient.DummyNameBeforeCopyPlayer, g_Config.m_ClDummyName, sizeof(pSelf->m_RClient.DummyNameBeforeCopyPlayer));
+				str_copy(pSelf->m_RClient.DummyClanBeforeCopyPlayer, g_Config.m_ClDummyClan, sizeof(pSelf->m_RClient.DummyClanBeforeCopyPlayer));
+				pSelf->m_RClient.DummyUseCustomColorBeforeCopyPlayer = g_Config.m_ClDummyUseCustomColor;
+				pSelf->m_RClient.DummyBodyColorBeforeCopyPlayer = g_Config.m_ClDummyColorBody;
+				pSelf->m_RClient.DummyFeetColorBeforeCopyPlayer = g_Config.m_ClDummyColorFeet;
+				pSelf->m_RClient.DummyCountryBeforeCopyPlayer = g_Config.m_ClDummyCountry;
+				str_copy(g_Config.m_ClDummySkin, ClientData.m_aSkinName, sizeof(g_Config.m_ClDummySkin));
+				if(g_Config.m_ClCopyNickWithDot)
+				{
+					str_format(g_Config.m_ClDummyName, sizeof(g_Config.m_ClDummyName), "%s.", ClientData.m_aName);
+				}
+				else
+				{
+					str_copy(g_Config.m_ClDummyName, ClientData.m_aName, sizeof(g_Config.m_ClDummyName));
+				}
+				str_copy(g_Config.m_ClDummyClan, ClientData.m_aClan, sizeof(g_Config.m_ClDummyClan));
+				g_Config.m_ClDummyUseCustomColor = ClientData.m_UseCustomColor;
+				g_Config.m_ClDummyColorBody = ClientData.m_ColorBody;
+				g_Config.m_ClDummyColorFeet = ClientData.m_ColorFeet;
+				g_Config.m_ClDummyCountry = ClientData.m_Country;
+
+				pSelf->SendDummyInfo(false);
+			}
+			if(g_Config.m_ClDummy == 0)
+			{
+				str_copy(pSelf->m_RClient.PlayerSkinBeforeCopyPlayer, g_Config.m_ClPlayerSkin, sizeof(pSelf->m_RClient.PlayerSkinBeforeCopyPlayer));
+				str_copy(pSelf->m_RClient.PlayerNameBeforeCopyPlayer, g_Config.m_PlayerName, sizeof(pSelf->m_RClient.PlayerNameBeforeCopyPlayer));
+				str_copy(pSelf->m_RClient.PlayerClanBeforeCopyPlayer, g_Config.m_PlayerClan, sizeof(pSelf->m_RClient.PlayerClanBeforeCopyPlayer));
+				pSelf->m_RClient.PlayerUseCustomColorBeforeCopyPlayer = g_Config.m_ClPlayerUseCustomColor;
+				pSelf->m_RClient.PlayerBodyColorBeforeCopyPlayer = g_Config.m_ClPlayerColorBody;
+				pSelf->m_RClient.PlayerFeetColorBeforeCopyPlayer = g_Config.m_ClPlayerColorFeet;
+				pSelf->m_RClient.PlayerCountryBeforeCopyPlayer = g_Config.m_PlayerCountry;
+				str_copy(g_Config.m_ClPlayerSkin, ClientData.m_aSkinName, sizeof(g_Config.m_ClPlayerSkin));
+				if(g_Config.m_ClCopyNickWithDot)
+				{
+					str_format(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), "%s.", ClientData.m_aName);
+				}
+				else
+				{
+					str_copy(g_Config.m_PlayerName, ClientData.m_aName, sizeof(g_Config.m_PlayerName));
+				}
+				str_copy(g_Config.m_PlayerClan, ClientData.m_aClan, sizeof(g_Config.m_PlayerClan));
+				g_Config.m_ClPlayerUseCustomColor = ClientData.m_UseCustomColor;
+				g_Config.m_ClPlayerColorBody = ClientData.m_ColorBody;
+				g_Config.m_ClPlayerColorFeet = ClientData.m_ColorFeet;
+				g_Config.m_PlayerCountry = ClientData.m_Country;
+				pSelf->SendInfo(false);
+			}
+		}
+		else
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "No player found for this client");
+		}
+	}
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "Invalid client ID");
+		pSelf->Echo("No that player on server");
+	}
+}
+
+void CGameClient::ConFindPlayer(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	const char *pInput = pResult->GetString(0);
+	char aInput[256];
+	str_copy(aInput, pInput, sizeof(aInput));
+	str_utf8_trim_right(aInput);
+	int ClientID = -1;
+	// First try to find by name
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(str_comp_nocase(pSelf->m_aClients[i].m_aName, aInput) == 0)
+		{
+			ClientID = i;
+			break;
+		}
+	}
+
+	// If not found by name, try to use input as ID
+	if(ClientID == -1)
+	{
+		ClientID = str_toint(aInput);
+	}
+
+	// Validate client ID
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+	{
+		const CGameClient::CClientData &ClientData = pSelf->m_aClients[ClientID];
+		if(ClientData.m_aSkinName[0])
+		{
+			char aBuf[512];
+
+			// Базовая информация о скине
+			str_format(aBuf, sizeof(aBuf), "Skin info for client %d:\n", ClientID);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Название скина
+			str_format(aBuf, sizeof(aBuf), "- Skin name: %s", ClientData.m_aSkinName);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Цвет тела
+			str_format(aBuf, sizeof(aBuf), "- Body Color: %d",
+				ClientData.m_ColorBody);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Цвет ног
+			str_format(aBuf, sizeof(aBuf), "- Feet Color: %d",
+				ClientData.m_ColorFeet);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Включены ли кастом цвет
+			str_format(aBuf, sizeof(aBuf), "- Custom Color: %d",
+				ClientData.m_UseCustomColor);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			str_format(aBuf, sizeof(aBuf), "- Name: %s", ClientData.m_aName);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			str_format(aBuf, sizeof(aBuf), "- Clan: %s", ClientData.m_aClan);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			str_format(aBuf, sizeof(aBuf), "- Country: %d",
+				ClientData.m_Country);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+		}
+		else
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "No skin found for this client");
+		}
+	}
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "Invalid client ID");
+		pSelf->Echo("No that player on server");
+	}
+}
+
+void CGameClient::ConCopyColor(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	const char *pInput = pResult->GetString(0);
+	char aInput[256];
+	str_copy(aInput, pInput, sizeof(aInput));
+	str_utf8_trim_right(aInput);
+	int ClientID = -1;
+	// First try to find by name
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(str_comp_nocase(pSelf->m_aClients[i].m_aName, aInput) == 0)
+		{
+			ClientID = i;
+			break;
+		}
+	}
+
+	// If not found by name, try to use input as ID
+	if(ClientID == -1)
+	{
+		ClientID = str_toint(aInput);
+	}
+
+	// Validate client ID
+	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
+	{
+		const CGameClient::CClientData &ClientData = pSelf->m_aClients[ClientID];
+		if(ClientData.m_aSkinName[0])
+		{
+			char aBuf[512];
+
+			// Базовая информация о скине
+			str_format(aBuf, sizeof(aBuf), "Skin info for client %d:\n", ClientID);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			str_format(aBuf, sizeof(aBuf), "- Name: %s", ClientData.m_aName);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Цвет тела
+			str_format(aBuf, sizeof(aBuf), "- Body Color: %d",
+				ClientData.m_ColorBody);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Цвет ног
+			str_format(aBuf, sizeof(aBuf), "- Feet Color: %d",
+				ClientData.m_ColorFeet);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			// Включены ли кастом цвет
+			str_format(aBuf, sizeof(aBuf), "- Custom Color: %d",
+				ClientData.m_UseCustomColor);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+
+			if(g_Config.m_ClDummy == 1)
+			{
+				str_copy(pSelf->m_RClient.DummySkinBeforeCopyPlayer, g_Config.m_ClDummySkin, sizeof(pSelf->m_RClient.DummySkinBeforeCopyPlayer));
+				str_copy(pSelf->m_RClient.DummyNameBeforeCopyPlayer, g_Config.m_ClDummyName, sizeof(pSelf->m_RClient.DummyNameBeforeCopyPlayer));
+				str_copy(pSelf->m_RClient.DummyClanBeforeCopyPlayer, g_Config.m_ClDummyClan, sizeof(pSelf->m_RClient.DummyClanBeforeCopyPlayer));
+				pSelf->m_RClient.DummyUseCustomColorBeforeCopyPlayer = g_Config.m_ClDummyUseCustomColor;
+				pSelf->m_RClient.DummyBodyColorBeforeCopyPlayer = g_Config.m_ClDummyColorBody;
+				pSelf->m_RClient.DummyFeetColorBeforeCopyPlayer = g_Config.m_ClDummyColorFeet;
+				pSelf->m_RClient.DummyCountryBeforeCopyPlayer = g_Config.m_ClDummyCountry;
+				g_Config.m_ClDummyUseCustomColor = ClientData.m_UseCustomColor;
+				g_Config.m_ClDummyColorBody = ClientData.m_ColorBody;
+				g_Config.m_ClDummyColorFeet = ClientData.m_ColorFeet;
+				pSelf->SendDummyInfo(false);
+			}
+			if(g_Config.m_ClDummy == 0)
+			{
+				str_copy(pSelf->m_RClient.PlayerSkinBeforeCopyPlayer, g_Config.m_ClPlayerSkin, sizeof(pSelf->m_RClient.PlayerSkinBeforeCopyPlayer));
+				str_copy(pSelf->m_RClient.PlayerNameBeforeCopyPlayer, g_Config.m_PlayerName, sizeof(pSelf->m_RClient.PlayerNameBeforeCopyPlayer));
+				str_copy(pSelf->m_RClient.PlayerClanBeforeCopyPlayer, g_Config.m_PlayerClan, sizeof(pSelf->m_RClient.PlayerClanBeforeCopyPlayer));
+				pSelf->m_RClient.PlayerUseCustomColorBeforeCopyPlayer = g_Config.m_ClPlayerUseCustomColor;
+				pSelf->m_RClient.PlayerBodyColorBeforeCopyPlayer = g_Config.m_ClPlayerColorBody;
+				pSelf->m_RClient.PlayerFeetColorBeforeCopyPlayer = g_Config.m_ClPlayerColorFeet;
+				pSelf->m_RClient.PlayerCountryBeforeCopyPlayer = g_Config.m_PlayerCountry;
+				g_Config.m_ClPlayerUseCustomColor = ClientData.m_UseCustomColor;
+				g_Config.m_ClPlayerColorBody = ClientData.m_ColorBody;
+				g_Config.m_ClPlayerColorFeet = ClientData.m_ColorFeet;
+				pSelf->SendInfo(false);
+			}
+		}
+		else
+		{
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "No skin found for this client");
+		}
+	}
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "Invalid client ID");
+		pSelf->Echo("No that player on server");
+	}
+}
+
+void CGameClient::ConTargetPlayerPos(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	if(pResult->NumArguments() == 0)
+	{
+		return;
+	}
+	const char *pInput = pResult->GetString(0);
+	char aInput[256];
+	str_copy(aInput, pInput, sizeof(aInput));
+	str_utf8_trim_right(aInput);
+	int ClientID = -1;
+	// First try to find by name
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(str_comp_nocase(pSelf->m_aClients[i].m_aName, aInput) == 0)
+		{
+			ClientID = i;
+			// Find first free slot
+			for(int j = 0; j < MAX_CLIENTS; j++)
+			{
+				if(pSelf->m_RClient.TargetPositionId[j] == -1)
+				{
+					str_copy(pSelf->m_RClient.TargetPositionNickname[j], pSelf->m_aClients[ClientID].m_aName);
+					pSelf->m_RClient.TargetPositionId[j] = ClientID;
+					pSelf->m_RClient.TargetCount++;
+					char aBuf[128];
+					str_format(aBuf, sizeof(aBuf), "%s added to target list", pSelf->m_aClients[ClientID].m_aName);
+					pSelf->Echo(aBuf);
+					break;
+				}
+			}
+			break;
+		}
+	}
+
+	// If not found by name, try to use input as ID
+	if(ClientID == -1)
+	{
+		ClientID = str_toint(aInput);
+		if(ClientID >= 0 && ClientID < MAX_CLIENTS && pSelf->m_aClients[ClientID].m_aName[0] != '\0')
+		{
+			// Find first free slot
+			for(int j = 0; j < MAX_CLIENTS; j++)
+			{
+				if(pSelf->m_RClient.TargetPositionId[j] == -1)
+				{
+					str_copy(pSelf->m_RClient.TargetPositionNickname[j], pSelf->m_aClients[ClientID].m_aName);
+					pSelf->m_RClient.TargetPositionId[j] = ClientID;
+					pSelf->m_RClient.TargetCount++;
+					break;
+				}
+			}
+		}
+		else
+		{
+			pSelf->Echo("Invalid player ID or player not found");
+			dbg_msg("Search player", "Invalid player ID or player not found");
+		}
+	}
+}
+void CGameClient::ConTargetPlayerPosReset(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		pSelf->m_RClient.TargetPositionId[i] = -1;
+		pSelf->m_RClient.TargetPositionNickname[i][0] = '\0';
+	}
+	pSelf->m_RClient.TargetCount = 0;
+	pSelf->Echo("Target list resetted");
+}
+void CGameClient::ConTargetPlayerPosRemove(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	const char *pInput = pResult->GetString(0);
+	char aInput[256];
+	str_copy(aInput, pInput, sizeof(aInput));
+	str_utf8_trim_right(aInput);
+	int ClientID = -1;
+	// First try to find by name
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(str_comp_nocase(pSelf->m_aClients[i].m_aName, aInput) == 0)
+		{
+			ClientID = i;
+			// Find first free slot
+			for(int j = 0; j < pSelf->m_RClient.TargetCount; j++)
+			{
+				if(str_comp_nocase(pSelf->m_RClient.TargetPositionNickname[j], pSelf->m_aClients[ClientID].m_aName) == 0)
+				{
+					pSelf->m_RClient.TargetCount--;
+
+					// Shift remaining targets to fill the gap
+					for(int k = j; k < pSelf->m_RClient.TargetCount; k++)
+					{
+						pSelf->m_RClient.TargetPositionId[k] = pSelf->m_RClient.TargetPositionId[k + 1];
+						str_copy(pSelf->m_RClient.TargetPositionNickname[k], pSelf->m_RClient.TargetPositionNickname[k + 1], sizeof(pSelf->m_RClient.TargetPositionNickname[k]));
+					}
+
+					// Clear the last slot
+					pSelf->m_RClient.TargetPositionId[pSelf->m_RClient.TargetCount] = -1;
+					pSelf->m_RClient.TargetPositionNickname[pSelf->m_RClient.TargetCount][0] = '\0';
+					char aBuf[128];
+					str_format(aBuf, sizeof(aBuf), "%s removed from target list", pSelf->m_aClients[ClientID].m_aName);
+					pSelf->Echo(aBuf);
+					return;
+				}
+			}
+			break;
+		}
+	}
+
+	// If not found by name, try to use input as ID
+	if(ClientID == -1)
+	{
+		ClientID = str_toint(aInput);
+		if(ClientID >= 0 && ClientID < MAX_CLIENTS && pSelf->m_aClients[ClientID].m_aName[0] != '\0')
+		{
+			// Find matching slot
+			for(int j = 0; j < pSelf->m_RClient.TargetCount; j++)
+			{
+				if(pSelf->m_RClient.TargetPositionId[j] == ClientID)
+				{
+					pSelf->m_RClient.TargetCount--;
+
+					// Shift remaining targets to fill the gap
+					for(int k = j; k < pSelf->m_RClient.TargetCount; k++)
+					{
+						pSelf->m_RClient.TargetPositionId[k] = pSelf->m_RClient.TargetPositionId[k + 1];
+						str_copy(pSelf->m_RClient.TargetPositionNickname[k], pSelf->m_RClient.TargetPositionNickname[k + 1], sizeof(pSelf->m_RClient.TargetPositionNickname[k]));
+					}
+
+					// Clear the last slot
+					pSelf->m_RClient.TargetPositionId[pSelf->m_RClient.TargetCount] = -1;
+					pSelf->m_RClient.TargetPositionNickname[pSelf->m_RClient.TargetCount][0] = '\0';
+
+					pSelf->Echo("Player removed from target list");
+					return;
+				}
+			}
+			pSelf->Echo("Player not in target list");
+		}
+		else
+		{
+			pSelf->Echo("Invalid player ID or player not found");
+			dbg_msg("Search player", "Invalid player ID or player not found");
+		}
+	}
+}
+
+void CGameClient::ConAddCensorList(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	const char *pInput = pResult->GetString(0);
+	char aInput[256];
+	str_copy(aInput, pInput, sizeof(aInput));
+	str_utf8_trim_right(aInput);
+	char aBuf[256];
+	if(aInput[0])
+	{
+		if(g_Config.m_TcRegexChatIgnore[0])
+		{
+			char aNewRegex[512];
+			str_format(aBuf, sizeof(aBuf), "Added to existing regex: %s", aInput);
+			str_format(aNewRegex, sizeof(aNewRegex), "%s|%s", g_Config.m_TcRegexChatIgnore, aInput);
+			str_copy(g_Config.m_TcRegexChatIgnore, aNewRegex, sizeof(g_Config.m_TcRegexChatIgnore));
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Regex", aBuf);
+		}
+		else
+		{
+			str_copy(g_Config.m_TcRegexChatIgnore, aInput, sizeof(g_Config.m_TcRegexChatIgnore));
+			str_format(aBuf, sizeof(aBuf), "New regex added: %s", aInput);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Regex", aBuf);
+		}
+	}
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "Regex", "No word in this");
+	}
+}
+
 void CGameClient::ConKill(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameClient *)pUserData)->SendKill();
@@ -4626,6 +5297,43 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 	}
 	ImgInfo.Free();
 }
+
+void CGameClient::LoadRiHudSkin(const char *pPath, bool AsDir)
+{
+	if(m_HudSkinLoaded)
+	{
+		Graphics()->UnloadTexture(&m_RiHudSkin.m_SpriteHudDummyResetOnSwitch);
+		Graphics()->UnloadTexture(&m_RiHudSkin.m_SpriteHudDummyControl);
+		m_HudSkinLoaded = false;
+	}
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	bool IsDefault = false;
+	if(str_comp(pPath, "default") == 0)
+	{
+		str_copy(aPath, g_pData->m_aImages[IMAGE_RIACTIONS].m_pFilename);
+		IsDefault = true;
+	}
+
+	CImageInfo ImgInfo;
+	bool PngLoaded = Graphics()->LoadPng(ImgInfo, aPath, IStorage::TYPE_ALL);
+	if(!PngLoaded && !IsDefault)
+	{
+		if(AsDir)
+			LoadRiHudSkin("default");
+		else
+			LoadRiHudSkin(pPath, true);
+	}
+	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_HUD_DUMMY_RESETONSWITCH].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_HUD_DUMMY_RESETONSWITCH].m_pSet->m_Gridy, true) && Graphics()->IsImageFormatRgba(aPath, ImgInfo))
+	{
+		m_RiHudSkin.m_SpriteHudDummyResetOnSwitch = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DUMMY_RESETONSWITCH]);
+		m_RiHudSkin.m_SpriteHudDummyControl = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DUMMY_CONTROL]);
+
+		m_HudSkinLoaded = true;
+	}
+	ImgInfo.Free();
+}
+
 
 void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 {

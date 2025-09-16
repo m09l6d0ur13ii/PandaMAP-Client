@@ -69,6 +69,82 @@ void CPlayerIndicator::OnRender()
 				vec2 IndicatorPos(Norm.x * Offset + Position.x, Norm.y * Offset + Position.y);
 				CTeeRenderInfo TeeInfo = OtherTee.m_RenderInfo;
 				float Alpha = g_Config.m_TcIndicatorOpacity / 100.0f;
+
+				// --- TRANSPARENT INDICATOR LOGIC ---
+				if(g_Config.m_RiIndicatorTransparentToggle)
+				{
+					float TransparentStart = (float)g_Config.m_RiIndicatorTransparentOffset;
+					float TransparentEnd = (float)g_Config.m_RiIndicatorTransparentOffsetMax;
+					float MinAlpha = (float)g_Config.m_RiIndicatorTransparentMin / 100.0f;
+					float BaseAlpha = (float)g_Config.m_TcIndicatorOpacity / 100.0f;
+
+					// Calculate actual distance between players
+					float Distance = DistanceBetweenTwoPoints(Position, OtherTee.m_RenderPos);
+
+					// Scale distance to reasonable units (32 units per tile)
+					float ScaledDistance = Distance / 32.0f;
+
+					// Special case: if ClIndicatorOpacity is 0, use transparency settings directly
+					if(g_Config.m_TcIndicatorOpacity == 0)
+					{
+						if(ScaledDistance <= TransparentStart)
+						{
+							// Close distance - fully transparent
+							Alpha = 0.0f;
+						}
+						else if(ScaledDistance >= TransparentEnd)
+						{
+							// Far distance - use minimum alpha setting
+							Alpha = MinAlpha;
+						}
+						else
+						{
+							// Interpolate from 0 to min alpha
+							float t = (ScaledDistance - TransparentStart) / (TransparentEnd - TransparentStart);
+							Alpha = 0.0f + t * MinAlpha;
+						}
+					}
+					else
+					{
+						// Check if we should invert the transparency logic
+						bool InvertLogic = BaseAlpha < MinAlpha;
+
+						// Apply transparency based on distance
+						if(ScaledDistance <= TransparentStart)
+						{
+						}
+						else if(ScaledDistance >= TransparentEnd)
+						{
+							// Far distance - use target opacity
+							if(InvertLogic)
+							{
+								// If base opacity is lower than min, make it MORE visible at distance
+								Alpha = MinAlpha;
+							}
+							else
+							{
+								// Normal logic - make it LESS visible at distance
+								Alpha = Alpha * MinAlpha;
+							}
+						}
+						else
+						{
+							// Interpolate between base and target opacity
+							float t = (ScaledDistance - TransparentStart) / (TransparentEnd - TransparentStart);
+
+							if(InvertLogic)
+							{
+								// Inverted logic - increase visibility with distance
+								Alpha = BaseAlpha + t * (MinAlpha - BaseAlpha);
+							}
+							else
+							{
+								// Normal logic - decrease visibility with distance
+								Alpha = Alpha * (1.0f - t * (1.0f - MinAlpha));
+							}
+						}
+					}
+				}
 				if(OtherTee.m_FreezeEnd > 0 || OtherTee.m_DeepFrozen)
 				{
 					// check if player is frozen or is getting saved

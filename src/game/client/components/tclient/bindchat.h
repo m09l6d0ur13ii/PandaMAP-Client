@@ -53,7 +53,6 @@ public:
 			m_Bind = CBind(pName, pCommand);
 		}
 	};
-
 private:
 	static void ConAddBindchat(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddBindchatEx(IConsole::IResult *pResult, void *pUserData);
@@ -116,5 +115,4 @@ static CBindChat::CBindRclient s_aDefaultBindChatRclientTrackerHistory[] = {
 	{"Tracker player", ".trackplayer", "target_player_pos"},
 	{"Tracker player reset", ".trackplayerres", "target_player_pos_reset"},
 };
-
 #endif

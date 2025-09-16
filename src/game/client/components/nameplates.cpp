@@ -330,9 +330,9 @@ protected:
 	void UpdateText(CGameClient &This, const CNamePlateData &Data) override
 	{
 		m_FontSize = Data.m_FontSize;
-		// if (g_Config.m_RiEnableCensorList)
-			// str_copy(m_aText, This.m_Chat.FilterText(Data.m_pName), sizeof(m_aText));
-		// else
+		if (g_Config.m_RiEnableCensorList)
+			str_copy(m_aText, This.m_Chat.FilterText(Data.m_pName), sizeof(m_aText));
+		else
 			str_copy(m_aText, Data.m_pName, sizeof(m_aText));
 		CTextCursor Cursor;
 		Cursor.m_FontSize = m_FontSize;
@@ -1189,7 +1189,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	if(Data.m_ShowRClientIndicator)
 	{
 		// Check if this player is using RClient
-		// Data.m_IsUserRClientIndicator = GameClient()->m_RClient.IsPlayerRClient(pPlayerInfo->m_ClientId);
+		Data.m_IsUserRClientIndicator = GameClient()->m_RClient.IsPlayerRClient(pPlayerInfo->m_ClientId);
 	}
 
 

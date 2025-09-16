@@ -350,6 +350,7 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 		TicksHead += Client()->IntraGameTick(g_Config.m_ClDummy);
 	}
 
+	RenderLaser(pCurrent->m_From, pCurrent->m_To, OuterColor, InnerColor, Ticks, TicksHead, Type, g_Config.m_RiLaserGlowIntensity);
 	if(Type == LASERTYPE_DRAGGER)
 	{
 		TicksHead *= (((pCurrent->m_Subtype >> 1) % 3) * 4.0f) + 1;
@@ -358,123 +359,134 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 	RenderLaser(pCurrent->m_From, pCurrent->m_To, OuterColor, InnerColor, Ticks, TicksHead, Type);
 }
 
-void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA InnerColor, float TicksBody, float TicksHead, int Type) const
+void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA InnerColor, float TicksBody, float TicksHead, int Type, float GlowIntensity) const
 {
+	int TuneZone = (Client()->State() == IClient::STATE_ONLINE && GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones) ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
 	float Len = distance(Pos, From);
-
-	if(Len > 0)
+	if(g_Config.m_RiBetterLasers)
 	{
-		if(Type == LASERTYPE_DRAGGER)
+		if(Len > 0)
 		{
-			// rubber band effect
-			float Thickness = std::sqrt(Len) / 5.f;
-			TicksBody = std::clamp(Thickness, 1.0f, 5.0f);
-		}
-		vec2 Dir = normalize_pre_length(Pos - From, Len);
+			vec2 Dir = normalize_pre_length(Pos - From, Len);
 
-		float Ms = TicksBody * 1000.0f / Client()->GameTickSpeed();
-		float a;
+			float Ms = TicksBody * 1000.0f / Client()->GameTickSpeed();
+			float a = Ms / GameClient()->GetTuning(TuneZone)->m_LaserBounceDelay;
+			a = std::clamp(a, 0.0f, 1.0f);
+			float Ia = 1 - a;
+
+			Graphics()->TextureClear();
+			Graphics()->QuadsBegin();
+
+			constexpr int NumLayers = 13;
+
+			const float Alphas[NumLayers] = {
+				0.02f, 0.03f, 0.04f, 0.05f, 0.06f, 0.08f, 0.10f,
+				0.15f, 0.25f, 0.45f, 0.65f, 0.85f, 1.0f};
+			const float Widths[NumLayers] = {
+				24.0f, 22.0f, 20.0f, 18.0f, 16.0f, 14.0f, 12.0f,
+				10.0f, 8.0f, 6.0f, 4.0f, 3.0f, 2.0f};
+
+			for(int i = 0; i < NumLayers; ++i)
+			{
+				float Alpha = Alphas[i] * (GlowIntensity / 100.0f);
+				float Offset = Widths[i] * Ia * (GlowIntensity / 100.0f);
+				vec2 Out = vec2(Dir.y, -Dir.x) * Offset;
+
+				ColorRGBA Color = (i == NumLayers - 1) ? ColorRGBA(1.0f, 1.0f, 1.0f, Alpha) : (i >= NumLayers - 2 ? InnerColor.WithMultipliedAlpha(Alpha) : OuterColor.WithMultipliedAlpha(Alpha));
+
+				Graphics()->SetColor(Color);
+				IGraphics::CFreeformItem Freeform(
+					From.x - Out.x, From.y - Out.y,
+					From.x + Out.x, From.y + Out.y,
+					Pos.x - Out.x, Pos.y - Out.y,
+					Pos.x + Out.x, Pos.y + Out.y);
+				Graphics()->QuadsDrawFreeform(&Freeform, 1);
+			}
+
+			Graphics()->QuadsEnd();
+		}
+	}
+	else
+	{
+		if(Len > 0)
+		{
+			vec2 Dir = normalize_pre_length(Pos - From, Len);
+
+			float Ms = TicksBody * 1000.0f / Client()->GameTickSpeed();
+			float a;
 		if(Type == LASERTYPE_RIFLE || Type == LASERTYPE_SHOTGUN)
 		{
-			int TuneZone = (Client()->State() == IClient::STATE_ONLINE && GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones) ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
 			a = Ms / GameClient()->GetTuning(TuneZone)->m_LaserBounceDelay;
 		}
 		else
 		{
 			a = Ms / CTuningParams::DEFAULT.m_LaserBounceDelay;
 		}
-		a = std::clamp(a, 0.0f, 1.0f);
-		float Ia = 1 - a;
+			a = std::clamp(a, 0.0f, 1.0f);
+			float Ia = 1 - a;
 
-		Graphics()->TextureClear();
-		Graphics()->QuadsBegin();
+			Graphics()->TextureClear();
+			Graphics()->QuadsBegin();
 
-		// do outline
-		Graphics()->SetColor(OuterColor);
-		vec2 Out = vec2(Dir.y, -Dir.x) * (7.0f * Ia);
+			// do outline
+			Graphics()->SetColor(OuterColor);
+			vec2 Out = vec2(Dir.y, -Dir.x) * (7.0f * Ia);
 
-		IGraphics::CFreeformItem Freeform(
-			From.x - Out.x, From.y - Out.y,
-			From.x + Out.x, From.y + Out.y,
-			Pos.x - Out.x, Pos.y - Out.y,
-			Pos.x + Out.x, Pos.y + Out.y);
-		Graphics()->QuadsDrawFreeform(&Freeform, 1);
+			IGraphics::CFreeformItem Freeform(
+				From.x - Out.x, From.y - Out.y,
+				From.x + Out.x, From.y + Out.y,
+				Pos.x - Out.x, Pos.y - Out.y,
+				Pos.x + Out.x, Pos.y + Out.y);
+			Graphics()->QuadsDrawFreeform(&Freeform, 1);
 
-		// do inner
-		Out = vec2(Dir.y, -Dir.x) * (5.0f * Ia);
-		vec2 ExtraOutlinePos = Dir;
-		vec2 ExtraOutlineFrom = Type == LASERTYPE_DOOR ? vec2(0, 0) : Dir;
-		Graphics()->SetColor(InnerColor); // center
+			// do inner
+			Out = vec2(Dir.y, -Dir.x) * (5.0f * Ia);
+			vec2 ExtraOutlinePos = Dir;
+			vec2 ExtraOutlineFrom = Type == LASERTYPE_DOOR ? vec2(0, 0) : Dir;
+			Graphics()->SetColor(InnerColor); // center
 
-		Freeform = IGraphics::CFreeformItem(
-			From.x - Out.x + ExtraOutlineFrom.x, From.y - Out.y + ExtraOutlineFrom.y,
-			From.x + Out.x + ExtraOutlineFrom.x, From.y + Out.y + ExtraOutlineFrom.y,
-			Pos.x - Out.x - ExtraOutlinePos.x, Pos.y - Out.y - ExtraOutlinePos.y,
-			Pos.x + Out.x - ExtraOutlinePos.x, Pos.y + Out.y - ExtraOutlinePos.y);
-		Graphics()->QuadsDrawFreeform(&Freeform, 1);
+			Freeform = IGraphics::CFreeformItem(
+				From.x - Out.x + ExtraOutlineFrom.x, From.y - Out.y + ExtraOutlineFrom.y,
+				From.x + Out.x + ExtraOutlineFrom.x, From.y + Out.y + ExtraOutlineFrom.y,
+				Pos.x - Out.x - ExtraOutlinePos.x, Pos.y - Out.y - ExtraOutlinePos.y,
+				Pos.x + Out.x - ExtraOutlinePos.x, Pos.y + Out.y - ExtraOutlinePos.y);
+			Graphics()->QuadsDrawFreeform(&Freeform, 1);
 
-		Graphics()->QuadsEnd();
+			Graphics()->QuadsEnd();
+		}
 	}
 
 	// render head
-	if(Type == LASERTYPE_DOOR)
-	{
-		Graphics()->TextureClear();
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(OuterColor);
-		Graphics()->RenderQuadContainerEx(m_ItemsQuadContainerIndex, m_DoorHeadOffset, 1, Pos.x - 8.0f, Pos.y - 8.0f);
-		Graphics()->SetColor(InnerColor);
-		Graphics()->RenderQuadContainerEx(m_ItemsQuadContainerIndex, m_DoorHeadOffset, 1, Pos.x - 6.0f, Pos.y - 6.0f, 6.f / 8.f, 6.f / 8.f);
-	}
-	else if(Type == LASERTYPE_DRAGGER)
-	{
-		Graphics()->TextureSet(GameClient()->m_ExtrasSkin.m_SpritePulley);
-		for(int Inner = 0; Inner < 2; ++Inner)
-		{
-			Graphics()->SetColor(Inner ? InnerColor : OuterColor);
-
-			float Size = Inner ? 4.f / 5.f : 1.f;
-
-			// circle at laser end
-			if(Len > 0)
-			{
-				Graphics()->QuadsSetRotation(0);
-				Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_PulleyHeadOffset, From.x, From.y, Size, Size);
-			}
-
-			//rotating orbs
-			Size = Inner ? 0.75f - 1.f / 5.f : 0.75f;
-			for(int Orb = 0; Orb < 3; ++Orb)
-			{
-				vec2 Offset(10.f, 0);
-				Offset = rotate(Offset, Orb * 120 + TicksHead);
-				Graphics()->QuadsSetRotation(TicksHead + Orb * pi * 2.f / 3.f); // rotate the sprite as well, as it might be customized
-				Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_PulleyHeadOffset, From.x + Offset.x, From.y + Offset.y, Size, Size);
-			}
-		}
-	}
-	else if(Type == LASERTYPE_FREEZE)
-	{
-		float Pulsation = 6.f / 5.f + 1.f / 10.f * std::sin(TicksHead / 2.f);
-		float Angle = angle(Pos - From);
-		Graphics()->TextureSet(GameClient()->m_ExtrasSkin.m_SpriteHectagon);
-		Graphics()->QuadsSetRotation(Angle);
-		Graphics()->SetColor(OuterColor);
-		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_FreezeHeadOffset, Pos.x, Pos.y, 6.f / 5.f * Pulsation, 6.f / 5.f * Pulsation);
-		Graphics()->TextureSet(GameClient()->m_ExtrasSkin.m_SpriteParticleSnowflake);
-		// snowflakes are white
-		Graphics()->SetColor(ColorRGBA(1.f, 1.f, 1.f));
-		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_FreezeHeadOffset, Pos.x, Pos.y, Pulsation, Pulsation);
-	}
-	else
 	{
 		int CurParticle = (int)TicksHead % 3;
 		Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_aSpriteParticleSplat[CurParticle]);
-		Graphics()->QuadsSetRotation((int)TicksHead);
-		Graphics()->SetColor(OuterColor);
-		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y);
-		Graphics()->SetColor(InnerColor);
-		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y, 20.f / 24.f, 20.f / 24.f);
+
+		vec2 Dir = normalize(Pos - From);
+		float ImpactAngle = angle(Dir);
+		Graphics()->QuadsSetRotation(ImpactAngle);
+
+		float ImpactDot = absolute(dot(Dir, vec2(1, 0)));
+		float AngleFactor = 1.0f - (ImpactDot * 0.3f);
+
+		float BaseScale = 1.8f * AngleFactor;
+		Graphics()->SetColor(OuterColor.WithMultipliedAlpha(0.15f * (GlowIntensity / 100)));
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y, BaseScale, BaseScale);
+
+		BaseScale = 1.5f * AngleFactor;
+		Graphics()->SetColor(OuterColor.WithMultipliedAlpha(0.25f * (GlowIntensity / 100)));
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y, BaseScale, BaseScale);
+
+		BaseScale = 1.2f * AngleFactor;
+		Graphics()->SetColor(OuterColor.WithMultipliedAlpha(0.45f * (GlowIntensity / 100)));
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y, BaseScale, BaseScale);
+
+		BaseScale = 0.9f * AngleFactor;
+		Graphics()->SetColor(InnerColor.WithMultipliedAlpha(0.65f * (GlowIntensity / 100)));
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y, BaseScale, BaseScale);
+
+		BaseScale = 0.6f * AngleFactor;
+		Graphics()->SetColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f * (GlowIntensity / 100)));
+		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y, BaseScale, BaseScale);
 	}
 }
 

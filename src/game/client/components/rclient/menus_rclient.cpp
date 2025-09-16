@@ -381,7 +381,7 @@ void CMenus::RenderSettingsRushieInfo(CUIRect MainView)
 	if(DoButtonLineSize_Menu(&s_DiscordButton, RCLocalize("Discord"), 0, &ButtonLeft, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 		Client()->ViewLink("https://discord.gg/wUFTVAGVGa");
 	if(DoButtonLineSize_Menu(&s_WebsiteButton, RCLocalize("Website"), 0, &ButtonRight, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
-		// Client()->ViewLink(CRClient::RCLIENT_URL);
+		Client()->ViewLink(CRClient::RCLIENT_URL);
 
 	LeftView = LowerLeftView;
 	LeftView.HSplitBottom(LineSize * 4.0f + MarginSmall * 2.0f + HeadlineFontSize, nullptr, &LeftView);
@@ -932,31 +932,31 @@ void CMenus::RenderSettingsRushieSettings(CUIRect MainView)
 		str_copy(DiscordRPCOfflineMsg, g_Config.m_RiDiscordOfflineStatus);
 		DiscordRpcSet = true;
 	}
-	// if(DiscordRPC != g_Config.m_TcDiscordRPC)
-	// {
-	// 	m_RPC_Ratelimit = time_get() + time_freq() * 1.5f;
-	// 	DiscordRPC = g_Config.m_TcDiscordRPC;
-	// }
-	//
-	// if(g_Config.m_TcDiscordRPC)
-	// {
-	// 	if(DiscordRPCMap != g_Config.m_RiDiscordMapStatus)
-	// 	{
-	// 		// Ratelimit this so it doesn't get changed instantly every time you edit this
-	// 		DiscordRPCMap = g_Config.m_RiDiscordMapStatus;
-	// 		m_RPC_Ratelimit = time_get() + time_freq() * 1.5f;
-	// 	}
-	// 	else if(str_comp(DiscordRPCOnlineMsg, g_Config.m_RiDiscordOnlineStatus) != 0)
-	// 	{
-	// 		str_copy(DiscordRPCOnlineMsg, g_Config.m_RiDiscordOnlineStatus);
-	// 		m_RPC_Ratelimit = time_get() + time_freq() * 2.5f;
-	// 	}
-	// 	else if(str_comp(DiscordRPCOfflineMsg, g_Config.m_RiDiscordOfflineStatus) != 0)
-	// 	{
-	// 		str_copy(DiscordRPCOfflineMsg, g_Config.m_RiDiscordOfflineStatus);
-	// 		m_RPC_Ratelimit = time_get() + time_freq() * 2.5f;
-	// 	}
-	// }
+	if(DiscordRPC != g_Config.m_TcDiscordRPC)
+	{
+		m_RPC_Ratelimit = time_get() + time_freq() * 1.5f;
+		DiscordRPC = g_Config.m_TcDiscordRPC;
+	}
+
+	if(g_Config.m_TcDiscordRPC)
+	{
+		if(DiscordRPCMap != g_Config.m_RiDiscordMapStatus)
+		{
+			// Ratelimit this so it doesn't get changed instantly every time you edit this
+			DiscordRPCMap = g_Config.m_RiDiscordMapStatus;
+			m_RPC_Ratelimit = time_get() + time_freq() * 1.5f;
+		}
+		else if(str_comp(DiscordRPCOnlineMsg, g_Config.m_RiDiscordOnlineStatus) != 0)
+		{
+			str_copy(DiscordRPCOnlineMsg, g_Config.m_RiDiscordOnlineStatus);
+			m_RPC_Ratelimit = time_get() + time_freq() * 2.5f;
+		}
+		else if(str_comp(DiscordRPCOfflineMsg, g_Config.m_RiDiscordOfflineStatus) != 0)
+		{
+			str_copy(DiscordRPCOfflineMsg, g_Config.m_RiDiscordOfflineStatus);
+			m_RPC_Ratelimit = time_get() + time_freq() * 2.5f;
+		}
+	}
 
 	{
 		static CLineInput s_DiscordRPConline;

@@ -62,6 +62,14 @@
 #include "components/sounds.h"
 #include "components/spectator.h"
 #include "components/statboard.h"
+
+//Rclient
+#include "components/rclient/adminpanel.h"
+#include "components/rclient/chat_bubbles.h"
+#include "components/rclient/bindwheel.h"
+#include "components/rclient/rclient.h"
+
+//Tater
 #include "components/tclient/bg_draw.h"
 #include "components/tclient/bindchat.h"
 #include "components/tclient/bindwheel.h"
@@ -80,9 +88,6 @@
 #include "components/tooltips.h"
 #include "components/touch_controls.h"
 #include "components/voting.h"
-
-//Rclient
-#include "components/rclient/bindwheel.h"
 
 #include <vector>
 
@@ -154,6 +159,7 @@ class CGameClient : public IGameClient
 {
 public:
 	friend class CTClient;
+	friend class CRClient;
 
 	// all components
 	CInfoMessages m_InfoMessages;
@@ -222,10 +228,10 @@ public:
 	CMod m_Mod;
 
 	// RClient Components
-	// CChatBubbles m_ChatBubbles;
-	// CRClient m_RClient;
+	CChatBubbles m_ChatBubbles;
+	CRClient m_RClient;
 	CBindWheelSpec m_BindWheelSpec;
-	// CAdminPanel m_AdminPanelRi;
+	CAdminPanel m_AdminPanelRi;
 
 private:
 	std::vector<class CComponent *> m_vpAll;
@@ -279,6 +285,15 @@ private:
 
 	char m_aDDNetVersionStr[64];
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConFindSkin(IConsole::IResult *pResult, void *pUserData);
+	static void ConCopySkin(IConsole::IResult *pResult, void *pUserData);
+	static void ConFindPlayer(IConsole::IResult *pResult, void *pUserData);
+	static void ConCopyPlayer(IConsole::IResult *pResult, void *pUserData);
+	static void ConCopyColor(IConsole::IResult *pResult, void *pUserData);
+	static void ConTargetPlayerPos(IConsole::IResult *pResult, void *pUserData);
+	static void ConTargetPlayerPosReset(IConsole::IResult *pResult, void *pUserData);
+	static void ConTargetPlayerPosRemove(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddCensorList(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
 	static void ConReadyChange7(IConsole::IResult *pResult, void *pUserData);
 
@@ -690,7 +705,7 @@ public:
 	void SendSkinChange7(bool Dummy);
 	// Returns true if the requested skin change got applied by the server
 	bool GotWantedSkin7(bool Dummy);
-	void SendInfo(bool Start);
+	void SendInfo(bool Start) override;
 	void SendDummyInfo(bool Start) override;
 	void SendKill() const;
 	void SendReadyChange7();
@@ -747,6 +762,7 @@ public:
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);
 	void LoadParticlesSkin(const char *pPath, bool AsDir = false);
 	void LoadHudSkin(const char *pPath, bool AsDir = false);
+	void LoadRiHudSkin(const char *pPath, bool AsDir = false);
 	void LoadExtrasSkin(const char *pPath, bool AsDir = false);
 
 	struct SClientGameSkin
@@ -899,6 +915,15 @@ public:
 
 	SClientHudSkin m_HudSkin;
 	bool m_HudSkinLoaded = false;
+
+	struct SClientRiHudSkin
+	{
+		IGraphics::CTextureHandle m_SpriteHudDummyResetOnSwitch;
+		IGraphics::CTextureHandle m_SpriteHudDummyControl;
+	};
+
+	SClientRiHudSkin m_RiHudSkin;
+	bool m_RiHudSkinLoaded = false;
 
 	struct SClientExtrasSkin
 	{

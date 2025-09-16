@@ -64,6 +64,10 @@ class CHud : public CComponent
 	ESpeedChange m_aLastPlayerSpeedChange[2];
 	STextContainerIndex m_aPlayerPositionContainers[2];
 	float m_aPlayerPrevPosition[2];
+	STextContainerIndex m_aTargetPositionContainers[2];
+	float m_aTargetPrevPosition[2];
+	STextContainerIndex m_aDummyPositionContainers[2];
+	float m_aDummyPrevPosition[2];
 
 	void RenderCursor();
 
@@ -93,6 +97,14 @@ class CHud : public CComponent
 		float m_Angle = 0.0f;
 	};
 	class CMovementInformation GetMovementInformation(int ClientId, int Conn) const;
+
+	// Target info
+	vec2 m_Lastpostarget[MAX_CLIENTS];
+	CMovementInformation Targetinfo[MAX_CLIENTS];
+
+	// Dummy info
+	vec2 m_LastposDummy;
+	CMovementInformation Dummyinfo;
 
 	void RenderGameTimer();
 	void RenderPauseNotification();
@@ -167,6 +179,8 @@ private:
 	int m_LiveFrozenOffset;
 	int m_DummyHammerOffset;
 	int m_DummyCopyOffset;
+	int m_DummyResetOnSwitchOffset;
+	int m_DummyControlOffset;
 	int m_PracticeModeOffset;
 	int m_Team0ModeOffset;
 	int m_LockModeOffset;

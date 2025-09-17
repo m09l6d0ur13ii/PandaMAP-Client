@@ -2,9 +2,9 @@
 #include <game/client/components/chat.h>
 #include <game/client/gameclient.h>
 
-#include <generated/protocol.h>
 #include <game/localization.h>
 #include <game/version.h>
+#include <generated/protocol.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/json.h>
@@ -131,7 +131,7 @@ void CRClient::OnRender()
 	else if(Client()->State() != IClient::STATE_ONLINE && g_Config.m_RiShowRclientIndicator)
 	{
 		s_InitialFetchDone = false;
-		s_InitialFetchDoneDummy = false;	// Reset when disconnected
+		s_InitialFetchDoneDummy = false; // Reset when disconnected
 	}
 
 	if(Client()->State() == IClient::STATE_ONLINE && (!m_pRClientUsersTask || m_pRClientUsersTask->Done()) && g_Config.m_RiShowRclientIndicator)
@@ -151,8 +151,6 @@ void CRClient::OnRender()
 		}
 	}
 }
-
-
 
 void CRClient::FetchRclientDDstatsProfile()
 {
@@ -958,7 +956,6 @@ void CRClient::ConToggleDeepfly(IConsole::IResult *pResult, void *pUserData)
 			pSelf->GameClient()->Echo("[[red]] No old bind in memory. Binding +fire");
 			pSelf->GameClient()->m_Binds.Bind(291, "+fire", false, 0);
 		};
-
 	}
 	else
 	{
@@ -1088,8 +1085,7 @@ void CRClient::SendPlayerData(const char *pServerAddress, int ClientId, int Dumm
 			ClientId,
 			DummyClientId,
 			m_aAuthToken,
-			(long long)time_get()
-		);
+			(long long)time_get());
 	else
 		str_format(aJsonData, sizeof(aJsonData),
 			"{"
@@ -1101,8 +1097,7 @@ void CRClient::SendPlayerData(const char *pServerAddress, int ClientId, int Dumm
 			pServerAddress,
 			ClientId,
 			m_aAuthToken,
-			(long long)time_get()
-		);
+			(long long)time_get());
 
 	// Create and send HTTP request
 	m_pRClientUsersTaskSend = std::make_shared<CHttpRequest>(CRClient::RCLIENT_URL_USERS);
@@ -1152,7 +1147,7 @@ void CRClient::FinishAuthToken()
 	if(Token.type == json_string)
 	{
 		str_copy(m_aAuthToken, Token.u.string.ptr, sizeof(m_aAuthToken));
-			// The token might have a newline at the end
+		// The token might have a newline at the end
 		str_utf8_trim_right(m_aAuthToken);
 		GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "RClient", "Fetched auth token");
 	}
@@ -1225,7 +1220,7 @@ void CRClient::FinishRClientUsers()
 						for(unsigned int k = 0; k < PlayerData.u.object.length; k++)
 						{
 							if(str_comp(PlayerData.u.object.values[k].name, "dummy_id") == 0 &&
-							   PlayerData.u.object.values[k].value->type == json_integer)
+								PlayerData.u.object.values[k].value->type == json_integer)
 							{
 								int DummyId = PlayerData.u.object.values[k].value->u.integer;
 								m_vRClientUsers.emplace_back(std::string(pServerAddr), DummyId);

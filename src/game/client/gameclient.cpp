@@ -142,7 +142,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Translate,
 					      &m_Ghost,
 					      &m_TClient,
-					      &m_RClient,// Must be before chat and players
+					      &m_RClient, // Must be before chat and players
 					      &m_Players,
 					      &m_MapLayersForeground,
 					      &m_Outlines,
@@ -184,7 +184,7 @@ void CGameClient::OnConsoleInit()
 	m_vpInput.insert(m_vpInput.end(), {&m_Menus.m_Binder, // this will take over all input when we want to bind a key
 						  &m_Binds.m_SpecialBinds,
 						  &m_GameConsole,
-						  &m_Chat,	// chat has higher prio, due to that you can quit it by pressing esc
+						  &m_Chat, // chat has higher prio, due to that you can quit it by pressing esc
 						  &m_AdminPanelRi,
 						  &m_Scoreboard,
 						  &m_Motd, // for pressing esc to remove it
@@ -5333,7 +5333,6 @@ void CGameClient::LoadRiHudSkin(const char *pPath, bool AsDir)
 	}
 	ImgInfo.Free();
 }
-
 
 void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 {

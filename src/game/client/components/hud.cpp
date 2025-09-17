@@ -1535,7 +1535,7 @@ void CHud::RenderDummyActions()
 		return;
 	}
 	// render small dummy actions hud
-	const float BoxHeight = 13.0f + 3.0f + 13.0f + (g_Config.m_RiAdvancedShowhudDummyActions ? 13.0f * 2: 0.0f);
+	const float BoxHeight = 13.0f + 3.0f + 13.0f + (g_Config.m_RiAdvancedShowhudDummyActions ? 13.0f * 2 : 0.0f);
 	const float BoxWidth = 16.0f;
 
 	float StartX = m_Width - BoxWidth;
@@ -1701,7 +1701,7 @@ void CHud::RenderMovementInformation()
 	const bool PosOnly = ClientId == SPEC_FREEVIEW || (GameClient()->m_aClients[ClientId].m_SpecCharPresent);
 	// Draw the infomations depending on settings: Position, speed and target angle
 	// This display is only to present the available information from the last snapshot, not to interpolate or predict
-	if(!g_Config.m_ClShowhudPlayerPosition && (PosOnly || (!g_Config.m_ClShowhudPlayerSpeed && !g_Config.m_ClShowhudPlayerAngle)) && !(GameClient()->m_RClient.TargetCount)  && !(g_Config.m_RiShowhudDummyPosition && Client()->DummyConnected()))
+	if(!g_Config.m_ClShowhudPlayerPosition && (PosOnly || (!g_Config.m_ClShowhudPlayerSpeed && !g_Config.m_ClShowhudPlayerAngle)) && !(GameClient()->m_RClient.TargetCount) && !(g_Config.m_RiShowhudDummyPosition && Client()->DummyConnected()))
 	{
 		return;
 	}

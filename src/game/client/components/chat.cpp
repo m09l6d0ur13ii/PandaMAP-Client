@@ -563,7 +563,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 		if(g_Config.m_TcRegexChatIgnore[0] && g_Config.m_RiEnableCensorList)
 		{
-			const char* pFilteredMSG = FilterText(pMsg->m_pMessage, pMsg->m_ClientId, true);
+			const char *pFilteredMSG = FilterText(pMsg->m_pMessage, pMsg->m_ClientId, true);
 			AddLine(pMsg->m_ClientId, pMsg->m_Team, pFilteredMSG);
 		}
 		else if(g_Config.m_ClCensorChat)
@@ -1722,11 +1722,9 @@ void CChat::SendChatQueued(const char *pLine)
 		pEntry->m_Team = m_Mode == MODE_ALL ? 0 : 1;
 		str_copy(pEntry->m_aText, pLine, Length + 1);
 	}
-
-
 }
 
-const char* CChat::FilterText(const char* pMessage, int ClientId, bool IsChat)
+const char *CChat::FilterText(const char *pMessage, int ClientId, bool IsChat)
 {
 	if(!pMessage || !g_Config.m_TcRegexChatIgnore[0] || !g_Config.m_RiEnableCensorList)
 		return pMessage;
@@ -1788,7 +1786,6 @@ const char* CChat::FilterText(const char* pMessage, int ClientId, bool IsChat)
 
 			if(IsBlocked)
 			{
-
 				if(g_Config.m_RiMultipleReplacementChar)
 				{
 					size_t size = 0, count = 0;

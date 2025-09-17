@@ -28,6 +28,7 @@ class CRClient : public CComponent
 	static void ConUpdateNameplatesEditor(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConAddWhiteList(IConsole::IResult *pResult, void *pUserData);
+
 public:
 	CRClient();
 	int Sizeof() const override { return sizeof(*this); }
@@ -152,7 +153,6 @@ public:
 	bool s_InitialFetchDone = false;
 	bool s_InitialFetchDoneDummy = false;
 	int s_RclientIndicatorCount = 0;
-
 };
 
 #endif

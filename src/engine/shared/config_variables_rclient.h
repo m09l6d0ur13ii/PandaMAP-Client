@@ -18,7 +18,6 @@ MACRO_CONFIG_INT(RiMultipleReplacementChar, ri_multiple_replacement_char, 1, 0, 
 MACRO_CONFIG_STR(RiBlockedContentReplacementChar, ri_blocked_content_replacement_char, 64, "*", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Character used to replace blocked content")
 MACRO_CONFIG_STR(RiRegexPlayerWhitelist, ri_regex_player_whitelist, 512, "", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Chat filer whitelist")
 
-
 //Scoreboard
 MACRO_CONFIG_INT(RiResetPopupScoreboardOnUntab, ri_reset_popup_scoreboard_on_untab, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Reset popup scoreboard on untab")
 MACRO_CONFIG_INT(RiToggleScoreboardMouse, ri_toggle_scoreboard_mouse, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggle mouse scoreboard or work on hold")
@@ -54,7 +53,6 @@ MACRO_CONFIG_INT(RiShowLastPosHudDummy, ri_show_last_pos_hud_dummy, 0, 0, 1, CFG
 MACRO_CONFIG_INT(RiChangeDummyColorWhenXDummyEqualXPlayer, ri_change_dummy_color_when_x_equal_dummy, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Change color pos x hud dummy to green when x dummy = x player")
 MACRO_CONFIG_INT(RiChangePlayerColorWhenXDummyEqualXPlayer, ri_change_player_color_when_x_equal_dummy, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Change color pos x hud player to green when x dummy = x player")
 MACRO_CONFIG_INT(RiAdvancedShowhudDummyActions, ri_advanced_showhud_dummy_actions, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show advanced ingame HUD (Advanced Dummy Actions)")
-
 
 //Nameplates
 MACRO_CONFIG_INT(RiShowFire, ri_show_fire, 0, 0, 3, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show Fire in nameplates (0=off, 1 = only dummy, 2 = both, 3 = only your own)")

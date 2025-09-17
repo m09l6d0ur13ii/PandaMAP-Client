@@ -1,18 +1,18 @@
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
-#include <generated/protocol.h>
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <generated/protocol.h>
 
 #include <game/client/components/camera.h>
 #include <game/client/components/chat.h>
 #include <game/client/components/console.h>
-#include <game/client/components/menus.h>
 #include <game/client/components/controls.h>
+#include <game/client/components/menus.h>
 
-#include <game/client/components/emoticon.h>
 #include "adminpanel.h"
+#include <game/client/components/emoticon.h>
 
 #include "game/localization.h"
 struct SPopupProperties
@@ -74,7 +74,7 @@ void CAdminPanel::DoIconLabeledButtonDown(CUIRect *pRect, const char *pTitle, co
 	pRect->HSplitTop(Height, &Icon, &Label);
 	DoIconButton(&Icon, pIcon, IconSize, IconColor);
 	Label.HSplitTop(Dif, nullptr, &Label);
-	Label.HSplitTop(Label.h/2, &Label, nullptr);
+	Label.HSplitTop(Label.h / 2, &Label, nullptr);
 	Ui()->DoLabel(&Label, pTitle, TextSize, TEXTALIGN_MC);
 }
 
@@ -84,7 +84,7 @@ void CAdminPanel::DoLabelLabeledButtonDown(CUIRect *pRect, const char *pTitleDow
 	pRect->HSplitTop(Height, &Label, &LabelDown);
 	Ui()->DoLabel(&Label, pTitle, TextSize, TEXTALIGN_MC);
 	LabelDown.HSplitTop(Dif, nullptr, &LabelDown);
-	LabelDown.HSplitTop(LabelDown.h/2, &LabelDown, nullptr);
+	LabelDown.HSplitTop(LabelDown.h / 2, &LabelDown, nullptr);
 	Ui()->DoLabel(&LabelDown, pTitleDown, TextSizeDown, TEXTALIGN_MC);
 }
 
@@ -103,7 +103,7 @@ CAdminPanel::CAdminPanel()
 {
 	OnReset();
 	m_AdminInput.SetBuffer(m_Input, sizeof(m_Input)); // for reason
-	m_AdminTimers.SetBuffer(m_InputCharTimers, sizeof(m_InputCharTimers));// for time
+	m_AdminTimers.SetBuffer(m_InputCharTimers, sizeof(m_InputCharTimers)); // for time
 }
 
 void CAdminPanel::OnConsoleInit()
@@ -168,7 +168,6 @@ bool CAdminPanel::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 
 	Ui()->ConvertMouseMove(&x, &y, CursorType);
 
-
 	vec2 OldPos = m_Mouse.m_Position;
 	m_Mouse.m_Position.x += x / 3.6;
 	m_Mouse.m_Position.y += y / 3.6;
@@ -176,12 +175,12 @@ bool CAdminPanel::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 	// Check if we're dragging
 	if(m_Mouse.m_MouseInput && !m_Mouse.m_IsDragging)
 	{
-	    float DragThreshold = 5.0f;
-	    if(distance(OldPos, m_Mouse.m_Position) > DragThreshold)
-	    {
-	        m_Mouse.m_IsDragging = true;
-	        m_Mouse.m_DragStart = OldPos;
-	    }
+		float DragThreshold = 5.0f;
+		if(distance(OldPos, m_Mouse.m_Position) > DragThreshold)
+		{
+			m_Mouse.m_IsDragging = true;
+			m_Mouse.m_DragStart = OldPos;
+		}
 	}
 
 	const float ScreenWidth = 100.0f * 3.0f * Graphics()->ScreenAspect();
@@ -190,7 +189,6 @@ bool CAdminPanel::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 
 	return true;
 }
-
 
 bool CAdminPanel::OnInput(const IInput::CEvent &Event)
 {
@@ -226,7 +224,6 @@ bool CAdminPanel::OnInput(const IInput::CEvent &Event)
 			return true;
 	}
 
-
 	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_MOUSE_2)
 	{
 		// find closest player to mouse
@@ -246,7 +243,6 @@ bool CAdminPanel::OnInput(const IInput::CEvent &Event)
 			RIReset();
 		}
 	}
-
 
 	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
 	{
@@ -310,11 +306,7 @@ void CAdminPanel::OnRender()
 		float ScreenHeight = 100.0f * 3.0f;
 		m_PlayerScreenPos = vec2(
 			ScreenWidth / 2 + (PlayerPos.x - GameClient()->m_Camera.m_Center.x) / 2.68f / GameClient()->m_Camera.m_Zoom,
-			ScreenHeight / 2 + (PlayerPos.y - GameClient()->m_Camera.m_Center.y) / 2.68f / GameClient()->m_Camera.m_Zoom
-		);
-
-
-
+			ScreenHeight / 2 + (PlayerPos.y - GameClient()->m_Camera.m_Center.y) / 2.68f / GameClient()->m_Camera.m_Zoom);
 
 		float Dist = distance(vec2(m_Mouse.m_Position.x, m_Mouse.m_Position.y), m_PlayerScreenPos);
 		if(Dist < ClosestDist)
@@ -357,17 +349,16 @@ void CAdminPanel::RenderPlayerPanelPopUp()
 
 	if(m_LastConfirm == 0)
 	{
-		Base.h = 100.0f * 3.0f/1.5;
-		Base.w = 100.0f * 3.0f * Graphics()->ScreenAspect()/1.5 + SPopupProperties::ms_ButtonHeight;
+		Base.h = 100.0f * 3.0f / 1.5;
+		Base.w = 100.0f * 3.0f * Graphics()->ScreenAspect() / 1.5 + SPopupProperties::ms_ButtonHeight;
 	}
 	else
 	{
-		Base.h = 100.0f * 3.0f/4;
-		Base.w = 100.0f * 3.0f * Graphics()->ScreenAspect()/3;
+		Base.h = 100.0f * 3.0f / 4;
+		Base.w = 100.0f * 3.0f * Graphics()->ScreenAspect() / 3;
 	}
-	Base.x = 100.0f * 3.0f * Graphics()->ScreenAspect()/2 - Base.w/2 + (m_LastConfirm == 0 ? SPopupProperties::ms_ButtonHeight/2 : 0);
-	Base.y = (100.0f * 3.0f)/2 - Base.h/2;
-
+	Base.x = 100.0f * 3.0f * Graphics()->ScreenAspect() / 2 - Base.w / 2 + (m_LastConfirm == 0 ? SPopupProperties::ms_ButtonHeight / 2 : 0);
+	Base.y = (100.0f * 3.0f) / 2 - Base.h / 2;
 
 	vec2 ScreenTL, ScreenBR;
 	Graphics()->GetScreen(&ScreenTL.x, &ScreenTL.y, &ScreenBR.x, &ScreenBR.y);
@@ -384,9 +375,9 @@ void CAdminPanel::RenderPlayerPanelPopUp()
 	m_Popup.m_Rect = Base;
 
 	Base.VSplitRight(SPopupProperties::ms_ButtonHeight, &Base, &ButtonToggle);
-	if(m_LastConfirm == 0 )
+	if(m_LastConfirm == 0)
 	{
-		ButtonToggle.HSplitTop(ButtonToggle.h/2-20.0f, nullptr, &ButtonToggle);
+		ButtonToggle.HSplitTop(ButtonToggle.h / 2 - 20.0f, nullptr, &ButtonToggle);
 		ButtonToggle.HSplitTop(40.0f, &ButtonToggle, nullptr);
 		ButtonToggle.HSplitMid(&UpperButton, &LowerButton);
 		if(Hovered(&UpperButton))
@@ -437,7 +428,7 @@ void CAdminPanel::RenderPlayerPanelPopUp()
 
 void CAdminPanel::RenderPlayerPanelPopUpActionButtons(CUIRect *pBase)
 {
-    CUIRect Container, Action;
+	CUIRect Container, Action;
 
 	pBase->HSplitTop(SPopupProperties::ms_ItemSpacing, nullptr, pBase);
 	pBase->HSplitTop(SPopupProperties::ms_RconActionHight, &Container, pBase);
@@ -450,12 +441,12 @@ void CAdminPanel::RenderPlayerPanelPopUpActionButtons(CUIRect *pBase)
 	if(Hovered(&Action))
 	{
 		Action.Draw(m_ChosenActionButton == 1 ? SPopupProperties::ActionKillAltButtonColor() : SPopupProperties::ActionKillButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-		DoIconLabeledButtonDown(&Action, "kill", FontIcons::FONT_ICON_SCULL, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f ,0.0f, TextRender()->DefaultTextColor());
+		DoIconLabeledButtonDown(&Action, "kill", FontIcons::FONT_ICON_SCULL, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f, TextRender()->DefaultTextColor());
 	}
 	else
 	{
 		Action.Draw(m_ChosenActionButton == 1 ? SPopupProperties::ActionKillButtonColor() : SPopupProperties::ActionKillAltButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-		DoIconLabeledButtonDown(&Action, "kill", FontIcons::FONT_ICON_SCULL, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f ,0.0f, TextRender()->DefaultTextColor());
+		DoIconLabeledButtonDown(&Action, "kill", FontIcons::FONT_ICON_SCULL, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f, TextRender()->DefaultTextColor());
 	}
 	if(DoButtonLogic(&Action))
 	{
@@ -472,12 +463,12 @@ void CAdminPanel::RenderPlayerPanelPopUpActionButtons(CUIRect *pBase)
 	if(Hovered(&Action))
 	{
 		Action.Draw(m_ChosenActionButton == 2 ? SPopupProperties::ActionKickAltButtonColor() : SPopupProperties::ActionKickButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-		DoIconLabeledButtonDown(&Action, "kick", FontIcons::FONT_ICON_DOOR_OPEN, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f ,0.0f, TextRender()->DefaultTextColor());
+		DoIconLabeledButtonDown(&Action, "kick", FontIcons::FONT_ICON_DOOR_OPEN, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f, TextRender()->DefaultTextColor());
 	}
 	else
 	{
 		Action.Draw(m_ChosenActionButton == 2 ? SPopupProperties::ActionKickButtonColor() : SPopupProperties::ActionKickAltButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-		DoIconLabeledButtonDown(&Action, "kick", FontIcons::FONT_ICON_DOOR_OPEN, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f ,0.0f, TextRender()->DefaultTextColor());
+		DoIconLabeledButtonDown(&Action, "kick", FontIcons::FONT_ICON_DOOR_OPEN, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f, TextRender()->DefaultTextColor());
 	}
 	if(DoButtonLogic(&Action))
 	{
@@ -493,22 +484,20 @@ void CAdminPanel::RenderPlayerPanelPopUpActionButtons(CUIRect *pBase)
 	// mute
 	if(Hovered(&Action))
 	{
-		Action.Draw(m_ChosenActionButton ==  3 ? SPopupProperties::ActionMuteAltButtonColor() : SPopupProperties::ActionMuteButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-		DoIconLabeledButtonDown(&Action, "mute", FontIcons::FONT_ICON_COMMENT_SLASH, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f ,0.0f, TextRender()->DefaultTextColor());
+		Action.Draw(m_ChosenActionButton == 3 ? SPopupProperties::ActionMuteAltButtonColor() : SPopupProperties::ActionMuteButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
+		DoIconLabeledButtonDown(&Action, "mute", FontIcons::FONT_ICON_COMMENT_SLASH, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f, TextRender()->DefaultTextColor());
 	}
 	else
 	{
-		Action.Draw(m_ChosenActionButton ==  3 ? SPopupProperties::ActionMuteButtonColor() : SPopupProperties::ActionMuteAltButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-		DoIconLabeledButtonDown(&Action, "mute", FontIcons::FONT_ICON_COMMENT_SLASH, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f ,0.0f, TextRender()->DefaultTextColor());
+		Action.Draw(m_ChosenActionButton == 3 ? SPopupProperties::ActionMuteButtonColor() : SPopupProperties::ActionMuteAltButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
+		DoIconLabeledButtonDown(&Action, "mute", FontIcons::FONT_ICON_COMMENT_SLASH, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f, TextRender()->DefaultTextColor());
 	}
 	if(DoButtonLogic(&Action))
 	{
-		if(m_ChosenActionButton ==  3)
+		if(m_ChosenActionButton == 3)
 			m_ChosenActionButton = 0;
 		else
-			m_ChosenActionButton =  3;
-
-
+			m_ChosenActionButton = 3;
 	}
 
 	// ban
@@ -517,13 +506,13 @@ void CAdminPanel::RenderPlayerPanelPopUpActionButtons(CUIRect *pBase)
 
 	if(Hovered(&Action))
 	{
-		Action.Draw(m_ChosenActionButton == 4? SPopupProperties::ActionBanAltButtonColor() : SPopupProperties::ActionBanButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-		DoIconLabeledButtonDown(&Action, "local ban", FontIcons::FONT_ICON_GAVEL, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f,0.0f, TextRender()->DefaultTextColor());
+		Action.Draw(m_ChosenActionButton == 4 ? SPopupProperties::ActionBanAltButtonColor() : SPopupProperties::ActionBanButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
+		DoIconLabeledButtonDown(&Action, "local ban", FontIcons::FONT_ICON_GAVEL, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f, TextRender()->DefaultTextColor());
 	}
 	else
 	{
 		Action.Draw(m_ChosenActionButton == 4 ? SPopupProperties::ActionBanButtonColor() : SPopupProperties::ActionBanAltButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-		DoIconLabeledButtonDown(&Action, "local ban", FontIcons::FONT_ICON_GAVEL, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f ,0.0f, TextRender()->DefaultTextColor());
+		DoIconLabeledButtonDown(&Action, "local ban", FontIcons::FONT_ICON_GAVEL, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f, TextRender()->DefaultTextColor());
 	}
 	if(DoButtonLogic(&Action))
 	{
@@ -542,12 +531,15 @@ void CAdminPanel::RenderPlayerPanelPopUpTimers(CUIRect *pBase)
 {
 	CUIRect Container, Button;
 
-	static const struct { const char *pTime; int Minutes; } s_aElems[] = {
+	static const struct
+	{
+		const char *pTime;
+		int Minutes;
+	} s_aElems[] = {
 		{"1m", 1}, {"5m", 5}, {"10m", 10}, {"15m", 15}, {"30m", 30}, {"45m", 45},
 		{"1h", 60}, {"3h", 180}, {"12h", 720}, {"1d", 1440}, {"3d", 4320}, {"5d", 7200},
 		{"1w", 10080}, {"2w", 20160}, {"3w", 30240}, {"1mo", 43200}, {"2mo", 86400}, {"3m", 129600},
-		{"6m", 259200}, {"9m", 388800}, {"1y", 518400}, {"2y", 1036800}
-	};
+		{"6m", 259200}, {"9m", 388800}, {"1y", 518400}, {"2y", 1036800}};
 
 	float ItemSpacingW = (pBase->w - (6 * SPopupProperties::ms_RconTimersWidth)) / 5;
 
@@ -655,21 +647,28 @@ void CAdminPanel::RenderPlayerPanelPopUpTimers(CUIRect *pBase)
 		}
 		Container.VSplitLeft(ItemSpacingW, nullptr, &Container);
 	}
-
 }
 
 void CAdminPanel::RenderPlayerPanelPopUpReadyButtons(CUIRect *pBase)
 {
 	CUIRect Label, Button, Column;
-	static const struct { const char *Reason; int Minutes;} s_aReadyMute[] = {
-		{"Insult", 15}, {"Spam", 5}, {"Advertising", 15}
-	};
-	static const struct { const char *Reason; int Minutes;} s_aReadyBan[] = {
-		{"Block", 60}, {"Bot Client", 2660}, {"Behaviour Inappropriate", 120}, {"Advertising bot client", 2660}
-	};
-	static const struct { const char *Reason;} s_aReadyKick[] = {
-		{"Block"}, {"Spam"}
-	};
+	static const struct
+	{
+		const char *Reason;
+		int Minutes;
+	} s_aReadyMute[] = {
+		{"Insult", 15}, {"Spam", 5}, {"Advertising", 15}};
+	static const struct
+	{
+		const char *Reason;
+		int Minutes;
+	} s_aReadyBan[] = {
+		{"Block", 60}, {"Bot Client", 2660}, {"Behaviour Inappropriate", 120}, {"Advertising bot client", 2660}};
+	static const struct
+	{
+		const char *Reason;
+	} s_aReadyKick[] = {
+		{"Block"}, {"Spam"}};
 
 	// Calculate the maximum height needed for the columns
 	char aBuf[128];
@@ -695,16 +694,16 @@ void CAdminPanel::RenderPlayerPanelPopUpReadyButtons(CUIRect *pBase)
 		if(Hovered(&Button))
 		{
 			Button.Draw(m_ChosenActionButton == 2 && !str_comp(m_Input, s_aReadyKick[i].Reason) ? SPopupProperties::ActionKickAltButtonColor() : SPopupProperties::ActionKickButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-			DoLabelLabeledButtonDown(&Button, "", s_aReadyKick[i].Reason, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f ,0.0f);
+			DoLabelLabeledButtonDown(&Button, "", s_aReadyKick[i].Reason, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f);
 		}
 		else
 		{
-			Button.Draw(m_ChosenActionButton == 2  && !str_comp(m_Input, s_aReadyKick[i].Reason) ? SPopupProperties::ActionKickButtonColor() : SPopupProperties::ActionKickAltButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-			DoLabelLabeledButtonDown(&Button, "", s_aReadyKick[i].Reason, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f ,0.0f);
+			Button.Draw(m_ChosenActionButton == 2 && !str_comp(m_Input, s_aReadyKick[i].Reason) ? SPopupProperties::ActionKickButtonColor() : SPopupProperties::ActionKickAltButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
+			DoLabelLabeledButtonDown(&Button, "", s_aReadyKick[i].Reason, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f);
 		}
 		if(DoButtonLogic(&Button))
 		{
-			if(m_ChosenActionButton == 2  && !str_comp(m_Input, s_aReadyKick[i].Reason))
+			if(m_ChosenActionButton == 2 && !str_comp(m_Input, s_aReadyKick[i].Reason))
 			{
 				m_ChosenActionButton = 0;
 				m_Input[0] = '\0';
@@ -733,16 +732,16 @@ void CAdminPanel::RenderPlayerPanelPopUpReadyButtons(CUIRect *pBase)
 		if(Hovered(&Button))
 		{
 			Button.Draw(m_ChosenActionButton == 3 && !str_comp(m_Input, s_aReadyMute[i].Reason) ? SPopupProperties::ActionMuteAltButtonColor() : SPopupProperties::ActionMuteButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-			DoLabelLabeledButtonDown(&Button, aBuf, s_aReadyMute[i].Reason, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f ,0.0f);
+			DoLabelLabeledButtonDown(&Button, aBuf, s_aReadyMute[i].Reason, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f);
 		}
 		else
 		{
-			Button.Draw(m_ChosenActionButton == 3  && !str_comp(m_Input, s_aReadyMute[i].Reason) ? SPopupProperties::ActionMuteButtonColor() : SPopupProperties::ActionMuteAltButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-			DoLabelLabeledButtonDown(&Button, aBuf, s_aReadyMute[i].Reason, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f ,0.0f);
+			Button.Draw(m_ChosenActionButton == 3 && !str_comp(m_Input, s_aReadyMute[i].Reason) ? SPopupProperties::ActionMuteButtonColor() : SPopupProperties::ActionMuteAltButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
+			DoLabelLabeledButtonDown(&Button, aBuf, s_aReadyMute[i].Reason, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f);
 		}
 		if(DoButtonLogic(&Button))
 		{
-			if(m_ChosenActionButton == 3  && !str_comp(m_Input, s_aReadyMute[i].Reason))
+			if(m_ChosenActionButton == 3 && !str_comp(m_Input, s_aReadyMute[i].Reason))
 			{
 				m_ChosenActionButton = 0;
 				m_Input[0] = '\0';
@@ -767,7 +766,6 @@ void CAdminPanel::RenderPlayerPanelPopUpReadyButtons(CUIRect *pBase)
 	int IsLeft = 1;
 	for(unsigned i = 0; i < std::size(s_aReadyBan); i++)
 	{
-
 		str_format(aBuf, sizeof(aBuf), "Minutes: %i", s_aReadyBan[i].Minutes);
 
 		if(IsLeft == 1)
@@ -784,16 +782,16 @@ void CAdminPanel::RenderPlayerPanelPopUpReadyButtons(CUIRect *pBase)
 		if(Hovered(&Button))
 		{
 			Button.Draw(m_ChosenActionButton == 4 && !str_comp(m_Input, s_aReadyBan[i].Reason) ? SPopupProperties::ActionBanAltButtonColor() : SPopupProperties::ActionBanButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-			DoLabelLabeledButtonDown(&Button, aBuf, s_aReadyBan[i].Reason, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f ,0.0f);
+			DoLabelLabeledButtonDown(&Button, aBuf, s_aReadyBan[i].Reason, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f);
 		}
 		else
 		{
-			Button.Draw(m_ChosenActionButton == 4  && !str_comp(m_Input, s_aReadyBan[i].Reason) ? SPopupProperties::ActionBanButtonColor() : SPopupProperties::ActionBanAltButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-			DoLabelLabeledButtonDown(&Button, aBuf, s_aReadyBan[i].Reason, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize,18.0f ,0.0f);
+			Button.Draw(m_ChosenActionButton == 4 && !str_comp(m_Input, s_aReadyBan[i].Reason) ? SPopupProperties::ActionBanButtonColor() : SPopupProperties::ActionBanAltButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
+			DoLabelLabeledButtonDown(&Button, aBuf, s_aReadyBan[i].Reason, SPopupProperties::ms_IconFontSize, SPopupProperties::ms_FontSize, 18.0f, 0.0f);
 		}
 		if(DoButtonLogic(&Button))
 		{
-			if(m_ChosenActionButton == 4  && !str_comp(m_Input, s_aReadyBan[i].Reason))
+			if(m_ChosenActionButton == 4 && !str_comp(m_Input, s_aReadyBan[i].Reason))
 			{
 				m_ChosenActionButton = 0;
 				m_Input[0] = '\0';
@@ -815,7 +813,6 @@ void CAdminPanel::RenderPlayerPanelPopUpReadyButtons(CUIRect *pBase)
 			IsLeft = 1;
 	}
 }
-
 
 void CAdminPanel::RenderPlayerPanelPopUpInputs(CUIRect *pBase)
 {
@@ -922,7 +919,7 @@ void CAdminPanel::RenderPlayerPanelPopUpLastConfirm(CUIRect *pBase)
 	Ui()->DoLabel(&Container, aCommand, SPopupProperties::ms_FontSize, TEXTALIGN_MC);
 	pBase->HSplitTop(SPopupProperties::ms_ItemSpacing, nullptr, pBase);
 	pBase->HSplitTop(SPopupProperties::ms_ButtonHeight, &Container, pBase);
-	Container.VSplitLeft(pBase->w/2-5, &Button, &Container);
+	Container.VSplitLeft(pBase->w / 2 - 5, &Button, &Container);
 	if(Hovered(&Button))
 		Button.Draw(SPopupProperties::ActionBanButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
 	else
@@ -933,7 +930,7 @@ void CAdminPanel::RenderPlayerPanelPopUpLastConfirm(CUIRect *pBase)
 		m_LastConfirm = 0;
 	}
 	Container.VSplitLeft(10, nullptr, &Container);
-	Container.VSplitLeft(pBase->w/2-5, &Button, &Container);
+	Container.VSplitLeft(pBase->w / 2 - 5, &Button, &Container);
 	if(Hovered(&Button))
 		Button.Draw(SPopupProperties::ActionBanButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
 	else
@@ -952,7 +949,7 @@ void CAdminPanel::RenderPlayerPanelPlayersList()
 {
 	CUIRect Base, Label, OneButton;
 
-	Base.h = 100.0f * 3.0f/1.5 - 10.0f;
+	Base.h = 100.0f * 3.0f / 1.5 - 10.0f;
 	Base.w = 20.0f;
 	if(!m_PlayerList.m_Active)
 		Base.x = -Base.w + 10;
@@ -960,10 +957,8 @@ void CAdminPanel::RenderPlayerPanelPlayersList()
 	{
 		Base.w = (SPopupProperties::ms_PlayerBtnWidth + SPopupProperties::ms_ItemSpacing) * m_PlayerList.m_ColumnCount + 20.0f;
 		Base.x = 0;
-
 	}
-	Base.y = (100.0f * 3.0f)/2 - Base.h/2;
-
+	Base.y = (100.0f * 3.0f) / 2 - Base.h / 2;
 
 	vec2 ScreenTL, ScreenBR;
 	Graphics()->GetScreen(&ScreenTL.x, &ScreenTL.y, &ScreenBR.x, &ScreenBR.y);
@@ -980,7 +975,7 @@ void CAdminPanel::RenderPlayerPanelPlayersList()
 	m_Popup.m_Rect = Base;
 
 	Base.VSplitRight(SPopupProperties::ms_ButtonHeight, &Base, &OneButton);
-	OneButton.HSplitTop(OneButton.h/2-10.0f, nullptr, &OneButton);
+	OneButton.HSplitTop(OneButton.h / 2 - 10.0f, nullptr, &OneButton);
 	OneButton.HSplitTop(20.0f, &OneButton, nullptr);
 	if(Hovered(&OneButton))
 		OneButton.Draw(SPopupProperties::WindowColorDark(), IGraphics::CORNER_R, SPopupProperties::ms_Rounding);
@@ -1015,7 +1010,7 @@ void CAdminPanel::RenderPlayerPanelPlayersList()
 
 		for(int i = 0; i < MAX_CLIENTS; ++i)
 		{
-			if (!GameClient()->m_Snap.m_apPlayerInfos[i])
+			if(!GameClient()->m_Snap.m_apPlayerInfos[i])
 				continue;
 
 			str_format(aBuf, sizeof(aBuf), "%i: %s", i, GameClient()->m_aClients[i].m_aName);
@@ -1024,12 +1019,10 @@ void CAdminPanel::RenderPlayerPanelPlayersList()
 			{
 				Base.VSplitLeft(SPopupProperties::ms_PlayerBtnWidth, &PlayerRow, &Base);
 				Base.VSplitLeft(SPopupProperties::ms_ItemSpacing, nullptr, &Base);
-
 			}
 
-			PlayerRow.HSplitTop(SPopupProperties::ms_ItemSpacing, nullptr, &PlayerRow );
-			PlayerRow.HSplitTop(SPopupProperties::ms_FontSize, &Player, &PlayerRow );
-
+			PlayerRow.HSplitTop(SPopupProperties::ms_ItemSpacing, nullptr, &PlayerRow);
+			PlayerRow.HSplitTop(SPopupProperties::ms_FontSize, &Player, &PlayerRow);
 
 			if(Hovered(&Player))
 				Player.Draw(SPopupProperties::ActionActiveButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
@@ -1123,7 +1116,6 @@ bool CAdminPanel::IsActive() const
 
 	return false;
 }
-
 
 bool CAdminPanel::IsActivePopup() const
 {

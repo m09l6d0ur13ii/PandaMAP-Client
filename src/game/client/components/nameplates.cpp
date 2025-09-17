@@ -330,7 +330,7 @@ protected:
 	void UpdateText(CGameClient &This, const CNamePlateData &Data) override
 	{
 		m_FontSize = Data.m_FontSize;
-		if (g_Config.m_RiEnableCensorList)
+		if(g_Config.m_RiEnableCensorList)
 			str_copy(m_aText, This.m_Chat.FilterText(Data.m_pName), sizeof(m_aText));
 		else
 			str_copy(m_aText, Data.m_pName, sizeof(m_aText));
@@ -613,6 +613,7 @@ protected:
 
 		m_Color.a = Data.m_Color.a;
 	}
+
 public:
 	CNamePlatePartFireDetector(CGameClient &This) :
 		CNamePlatePartSprite(This)
@@ -639,6 +640,7 @@ protected:
 
 		m_Color.a = Data.m_Color.a;
 	}
+
 public:
 	CNamePlatePartHookDetector(CGameClient &This) :
 		CNamePlatePartSprite(This)
@@ -665,6 +667,7 @@ protected:
 
 		m_Color.a = Data.m_Color.a;
 	}
+
 public:
 	CNamePlatePartRClientIndicator(CGameClient &This) :
 		CNamePlatePartSprite(This)
@@ -867,7 +870,6 @@ public:
 				AddPart<CNamePlatePartRClientIndicator>(This);
 				break;
 			}
-
 		}
 	}
 
@@ -1192,7 +1194,6 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 		Data.m_IsUserRClientIndicator = GameClient()->m_RClient.IsPlayerRClient(pPlayerInfo->m_ClientId);
 	}
 
-
 	// TClient
 	if(g_Config.m_TcWarList && g_Config.m_TcWarListShowClan && GameClient()->m_WarList.GetWarData(pPlayerInfo->m_ClientId).m_WarClan)
 		Data.m_ShowClan = true;
@@ -1369,4 +1370,3 @@ void CNamePlates::RiResetNameplatesPos(CGameClient &This, const char *pScheme) c
 		for(int i = 0; i < MAX_CLIENTS; ++i)
 			m_pData->m_aNamePlates[i].ApplyDefaultNamePlateScheme(This);
 }
-

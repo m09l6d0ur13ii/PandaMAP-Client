@@ -7,8 +7,8 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
-#include <generated/protocol.h>
 #include <game/localization.h>
+#include <generated/protocol.h>
 
 #include <game/client/components/menu_background.h>
 #include <game/client/components/menus.h>
@@ -54,7 +54,6 @@ const float MarginExtraSmall = 2.5f;
 const float MarginBetweenSections = 30.0f;
 const float MarginBetweenViews = 30.0f;
 
-
 static void SetFlag(int32_t &Flags, int n, bool Value)
 {
 	if(Value)
@@ -77,7 +76,7 @@ void CMenus::RenderSettingsRushie(CUIRect MainView)
 		s_Time = (float)rand() / (float)RAND_MAX;
 	}
 
-	if (Client()->RconAuthed())
+	if(Client()->RconAuthed())
 	{
 		SetFlag(g_Config.m_RiRClientSettingsTabs, RCLIENT_TAB_RCON, 0);
 	}
@@ -108,8 +107,7 @@ void CMenus::RenderSettingsRushie(CUIRect MainView)
 		RCLocalize("Bindwheel in spec"),
 		RCLocalize("Nameplate editor"),
 		RCLocalize("RCON"),
-		RCLocalize("Info")
-	};
+		RCLocalize("Info")};
 
 	for(int Tab = 0; Tab < NUMBER_OF_RUSHIE_TABS; ++Tab)
 	{
@@ -715,10 +713,10 @@ void CMenus::RenderSettingsRushieSettings(CUIRect MainView)
 	Ui()->DoLabel(&Label, RCLocalize("p=ping i=ignore m=ID n=name c=clan d=direction f=friend h=hook r=reason s=skin H=HookName F=FireName l=newline"), 10.0f, TEXTALIGN_ML);
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 	DoLine_RadioMenu(Column, RCLocalize("Show you' fire presses"),
-			m_vButtonContainersNamePlateFirePresses,
-			{Localize("None", "Show players' key presses"), Localize("Own", "Show players' key presses RC"), Localize("Dummy", "Show players' key presses"), Localize("Both", "Show players' key presses")},
-			{0, 3, 1, 2},
-			g_Config.m_RiShowFire);
+		m_vButtonContainersNamePlateFirePresses,
+		{Localize("None", "Show players' key presses"), Localize("Own", "Show players' key presses RC"), Localize("Dummy", "Show players' key presses"), Localize("Both", "Show players' key presses")},
+		{0, 3, 1, 2},
+		g_Config.m_RiShowFire);
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 	if(g_Config.m_RiShowFire > 0)
 	{
@@ -729,10 +727,10 @@ void CMenus::RenderSettingsRushieSettings(CUIRect MainView)
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 	}
 	DoLine_RadioMenu(Column, RCLocalize("Show players' hook presses"),
-			m_vButtonContainersNamePlateHookPresses,
-			{Localize("None", "Show players' key presses"), Localize("Own", "Show players' key presses RC"), Localize("Others", "Show players' key presses"), Localize("All", "Show players' key presses")},
-			{0, 3, 1, 2},
-			g_Config.m_RiShowHook);
+		m_vButtonContainersNamePlateHookPresses,
+		{Localize("None", "Show players' key presses"), Localize("Own", "Show players' key presses RC"), Localize("Others", "Show players' key presses"), Localize("All", "Show players' key presses")},
+		{0, 3, 1, 2},
+		g_Config.m_RiShowHook);
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 	if(g_Config.m_RiShowHook > 0)
 	{
@@ -766,7 +764,6 @@ void CMenus::RenderSettingsRushieSettings(CUIRect MainView)
 			Column.HSplitTop(MarginSmall, nullptr, &Column);
 		}
 	}
-
 
 	// Right column - Tracker pos
 	LeftView = Column;
@@ -979,7 +976,6 @@ void CMenus::RenderSettingsRushieSettings(CUIRect MainView)
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_RiRclientIndicatorAboveSelf, RCLocalize("Show indicator above you"), &g_Config.m_RiRclientIndicatorAboveSelf, &Column, LineSize);
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-
 	RightView = Column;
 
 	CUIRect ScrollRegion;
@@ -1003,11 +999,27 @@ void CMenus::RenderSettingsRushieNameplatesEditor(CUIRect MainView)
 
 	// --- 1. Левая колонка: вертикальный список для добавления ---
 	ListCol.Margin(MarginSmall, &ListCol);
-	ListCol.Draw(ColorRGBA(0.13f,0.13f,0.13f,0.7f), IGraphics::CORNER_ALL, 8.0f);
-	static const struct { char Code; const char *pDesc; const char *pIcon; } s_aElems[] = {
-		{'n', "Nick", "N"}, {'c', "Clan", "C"}, {'m', "ID", "#"}, {'f', "Friend", "♥"}, {'d', "Dir", "⇄"},
-		{'p', "Ping", "P"}, {'r', "Reason", "R"}, {'s', "Skin", "S"}, {'i', "Ignore", "I"}, {'h', "Hook", "H"}, {'l', "↵", "↵"},
-		{'H', "HookName", "HN"}, {'F', "FireName", "FN"}, {'I', "RC_User", "RI"},
+	ListCol.Draw(ColorRGBA(0.13f, 0.13f, 0.13f, 0.7f), IGraphics::CORNER_ALL, 8.0f);
+	static const struct
+	{
+		char Code;
+		const char *pDesc;
+		const char *pIcon;
+	} s_aElems[] = {
+		{'n', "Nick", "N"},
+		{'c', "Clan", "C"},
+		{'m', "ID", "#"},
+		{'f', "Friend", "♥"},
+		{'d', "Dir", "⇄"},
+		{'p', "Ping", "P"},
+		{'r', "Reason", "R"},
+		{'s', "Skin", "S"},
+		{'i', "Ignore", "I"},
+		{'h', "Hook", "H"},
+		{'l', "↵", "↵"},
+		{'H', "HookName", "HN"},
+		{'F', "FireName", "FN"},
+		{'I', "RC_User", "RI"},
 	};
 
 	// Улучшенные расчеты размеров кнопок с минимальными ограничениями
@@ -1039,13 +1051,15 @@ void CMenus::RenderSettingsRushieNameplatesEditor(CUIRect MainView)
 		static CButtonContainer s_aAddElemButtons[32];
 		char aLabel[32];
 		str_format(aLabel, sizeof(aLabel), "%s  %s", s_aElems[i].pIcon, RCLocalize(s_aElems[i].pDesc, "Nameplate_Editor"));
-		if(DoButton_Menu(&s_aAddElemButtons[i], aLabel, 0, &Btn, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 16.0f, 0.0f, ColorRGBA(0.22f,0.22f,0.22f,0.8f)))
+		if(DoButton_Menu(&s_aAddElemButtons[i], aLabel, 0, &Btn, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 16.0f, 0.0f, ColorRGBA(0.22f, 0.22f, 0.22f, 0.8f)))
 		{
 			std::vector<char> vScheme2;
-			for(const char *p = g_Config.m_RiNamePlateScheme; *p; ++p) vScheme2.push_back(*p);
+			for(const char *p = g_Config.m_RiNamePlateScheme; *p; ++p)
+				vScheme2.push_back(*p);
 			vScheme2.push_back(s_aElems[i].Code);
 			char aBuf[64] = {0};
-			for(size_t j = 0; j < vScheme2.size() && j < sizeof(aBuf)-1; ++j) aBuf[j] = vScheme2[j];
+			for(size_t j = 0; j < vScheme2.size() && j < sizeof(aBuf) - 1; ++j)
+				aBuf[j] = vScheme2[j];
 			str_copy(g_Config.m_RiNamePlateScheme, aBuf, sizeof(g_Config.m_RiNamePlateScheme));
 			GameClient()->m_NamePlates.RiResetNameplatesPos(*GameClient(), g_Config.m_RiNamePlateScheme);
 		}
@@ -1053,9 +1067,10 @@ void CMenus::RenderSettingsRushieNameplatesEditor(CUIRect MainView)
 
 	// --- 2. Средняя колонка: вертикальный drag&drop редактор (схема) ---
 	SchemeCol.Margin(MarginSmall, &SchemeCol);
-	SchemeCol.Draw(ColorRGBA(0.1f,0.1f,0.1f,0.7f), IGraphics::CORNER_ALL, 8.0f);
+	SchemeCol.Draw(ColorRGBA(0.1f, 0.1f, 0.1f, 0.7f), IGraphics::CORNER_ALL, 8.0f);
 	std::vector<char> vScheme;
-	for(const char *p = g_Config.m_RiNamePlateScheme; *p; ++p) vScheme.push_back(*p);
+	for(const char *p = g_Config.m_RiNamePlateScheme; *p; ++p)
+		vScheme.push_back(*p);
 
 	// Улучшенные расчеты размеров карточек - адаптивное сжатие
 	const float CardSpacing = MarginExtraSmall; // отступ между карточками
@@ -1089,10 +1104,17 @@ void CMenus::RenderSettingsRushieNameplatesEditor(CUIRect MainView)
 
 		CUIRect Card = {cx, CurrentCardY, CardW, CardH};
 		bool Hovered = Ui()->MouseInside(&Card);
-		if(Hovered) s_HoverIdx = i;
-		const char *pDesc = "?"; const char *pIcon = "?";
-		for(const auto &e : s_aElems) if(e.Code == vScheme[i]) { pDesc = e.pDesc; pIcon = e.pIcon; }
-		Card.Draw((s_DragIdx==int(i)) ? ColorRGBA(0.3f,0.3f,0.6f,0.9f) : (Hovered ? ColorRGBA(0.2f,0.2f,0.2f,0.9f) : ColorRGBA(0.18f,0.18f,0.18f,0.8f)), IGraphics::CORNER_ALL, 6.0f);
+		if(Hovered)
+			s_HoverIdx = i;
+		const char *pDesc = "?";
+		const char *pIcon = "?";
+		for(const auto &e : s_aElems)
+			if(e.Code == vScheme[i])
+			{
+				pDesc = e.pDesc;
+				pIcon = e.pIcon;
+			}
+		Card.Draw((s_DragIdx == int(i)) ? ColorRGBA(0.3f, 0.3f, 0.6f, 0.9f) : (Hovered ? ColorRGBA(0.2f, 0.2f, 0.2f, 0.9f) : ColorRGBA(0.18f, 0.18f, 0.18f, 0.8f)), IGraphics::CORNER_ALL, 6.0f);
 
 		// Кнопка удаления - размещаем сначала, чтобы зарезервировать место
 		CUIRect DelRect = Card;
@@ -1111,9 +1133,9 @@ void CMenus::RenderSettingsRushieNameplatesEditor(CUIRect MainView)
 		if(CardH >= 30.0f)
 		{
 			// Нормальное размещение для больших карточек
-			IconRect.HSplitTop(CardH*0.15f, nullptr, &IconRect);
-			IconRect.HSplitTop(CardH*0.35f, &IconRect, &TextRect);
-			TextRect.HSplitTop(CardH*0.35f, &TextRect, nullptr);
+			IconRect.HSplitTop(CardH * 0.15f, nullptr, &IconRect);
+			IconRect.HSplitTop(CardH * 0.35f, &IconRect, &TextRect);
+			TextRect.HSplitTop(CardH * 0.35f, &TextRect, nullptr);
 
 			Ui()->DoLabel(&IconRect, pIcon, std::min(18.0f, CardH * 0.4f), TEXTALIGN_MC);
 			Ui()->DoLabel(&TextRect, RCLocalize(pDesc, "Nameplate_Editor"), std::min(10.0f, CardH * 0.25f), TEXTALIGN_MC);
@@ -1123,18 +1145,19 @@ void CMenus::RenderSettingsRushieNameplatesEditor(CUIRect MainView)
 			// Компактное размещение для маленьких карточек
 			char aBuf[32];
 			str_format(aBuf, sizeof(aBuf), "%s  %s", pIcon, RCLocalize(pDesc, "Nameplate_Editor"));
-			IconRect.HSplitTop(CardH*0.1f, nullptr, &IconRect);
-			IconRect.HSplitTop(CardH*0.8f, &IconRect, nullptr);
+			IconRect.HSplitTop(CardH * 0.1f, nullptr, &IconRect);
+			IconRect.HSplitTop(CardH * 0.8f, &IconRect, nullptr);
 
 			// Только иконка для очень маленьких карточек
 			Ui()->DoLabel(&IconRect, aBuf, std::min(CardH * 0.6f, 16.0f), TEXTALIGN_MC);
 		}
 		static CButtonContainer s_aDelButtons[64];
-		if(DoButton_Menu(&s_aDelButtons[i], "✖", 0, &DelRect, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 8.0f, 0.0f, ColorRGBA(0.5f,0.1f,0.1f,0.8f)))
+		if(DoButton_Menu(&s_aDelButtons[i], "✖", 0, &DelRect, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 8.0f, 0.0f, ColorRGBA(0.5f, 0.1f, 0.1f, 0.8f)))
 		{
-			vScheme.erase(vScheme.begin()+i);
+			vScheme.erase(vScheme.begin() + i);
 			char aBuf[64] = {0};
-			for(size_t j = 0; j < vScheme.size() && j < sizeof(aBuf)-1; ++j) aBuf[j] = vScheme[j];
+			for(size_t j = 0; j < vScheme.size() && j < sizeof(aBuf) - 1; ++j)
+				aBuf[j] = vScheme[j];
 			str_copy(g_Config.m_RiNamePlateScheme, aBuf, sizeof(g_Config.m_RiNamePlateScheme));
 			GameClient()->m_NamePlates.RiResetNameplatesPos(*GameClient(), g_Config.m_RiNamePlateScheme);
 			return;
@@ -1148,7 +1171,8 @@ void CMenus::RenderSettingsRushieNameplatesEditor(CUIRect MainView)
 		{
 			std::swap(vScheme[s_DragIdx], vScheme[s_HoverIdx]);
 			char aBuf[64] = {0};
-			for(size_t j = 0; j < vScheme.size() && j < sizeof(aBuf)-1; ++j) aBuf[j] = vScheme[j];
+			for(size_t j = 0; j < vScheme.size() && j < sizeof(aBuf) - 1; ++j)
+				aBuf[j] = vScheme[j];
 			str_copy(g_Config.m_RiNamePlateScheme, aBuf, sizeof(g_Config.m_RiNamePlateScheme));
 			GameClient()->m_NamePlates.RiResetNameplatesPos(*GameClient(), g_Config.m_RiNamePlateScheme);
 			s_DragIdx = s_HoverIdx;
@@ -1164,13 +1188,13 @@ void CMenus::RenderSettingsRushieNameplatesEditor(CUIRect MainView)
 	CUIRect PreviewLabel, PreviewRect, DummyCheckRect;
 	PreviewCol.HSplitTop(24.0f, &PreviewLabel, &PreviewCol);
 	Ui()->DoLabel(&PreviewLabel, RCLocalize("Preview:"), 14.0f, TEXTALIGN_ML);
-	PreviewCol.HSplitTop(PreviewCol.h-84.0f, &PreviewRect, &PreviewCol); // 60+24=84, чтобы хватило места под строку схемы
+	PreviewCol.HSplitTop(PreviewCol.h - 84.0f, &PreviewRect, &PreviewCol); // 60+24=84, чтобы хватило места под строку схемы
 	PreviewRect.Margin(6.0f, &PreviewRect);
-	PreviewRect.Draw(ColorRGBA(0.12f,0.12f,0.12f,0.7f), IGraphics::CORNER_ALL, 8.0f);
+	PreviewRect.Draw(ColorRGBA(0.12f, 0.12f, 0.12f, 0.7f), IGraphics::CORNER_ALL, 8.0f);
 	static int showDummyPreview = false;
 	PreviewCol.HSplitTop(24.0f, &DummyCheckRect, &PreviewCol);
 	DoButton_CheckBoxAutoVMarginAndSet(&showDummyPreview, RCLocalize("Show dummy"), &showDummyPreview, &DummyCheckRect, 20.0f);
-	vec2 PreviewPos = vec2(PreviewRect.x + PreviewRect.w/2, PreviewRect.y + PreviewRect.h*0.45f);
+	vec2 PreviewPos = vec2(PreviewRect.x + PreviewRect.w / 2, PreviewRect.y + PreviewRect.h * 0.45f);
 	GameClient()->m_NamePlates.RenderNamePlatePreview(PreviewPos, showDummyPreview ? 1 : 0);
 	// --- Вывод схемы текстом ---
 	static CLineInput s_CurrentScheme;
@@ -1187,12 +1211,12 @@ void CMenus::RenderSettingsRushieNameplatesEditor(CUIRect MainView)
 	PreviewCol.VSplitLeft(PreviewCol.w * 0.5f, &ResetCol, &ClearCol);
 	ResetCol.VSplitRight(4.0f, &ResetCol, &Spacer);
 	ClearCol.VSplitLeft(4.0f, &Spacer, &ClearCol);
-	if(DoButton_Menu(&s_ResetButton, RCLocalize("Reset to default"), 0, &ResetCol, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 14.0f, 0.0f, ColorRGBA(0.3f,0.1f,0.1f,0.8f)))
+	if(DoButton_Menu(&s_ResetButton, RCLocalize("Reset to default"), 0, &ResetCol, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 14.0f, 0.0f, ColorRGBA(0.3f, 0.1f, 0.1f, 0.8f)))
 	{
 		str_copy(g_Config.m_RiNamePlateScheme, "IpifmnlclrlFHlsldlh", sizeof(g_Config.m_RiNamePlateScheme));
 		GameClient()->m_NamePlates.RiResetNameplatesPos(*GameClient(), g_Config.m_RiNamePlateScheme);
 	}
-	if(DoButton_Menu(&s_ClearButton, RCLocalize("Clear all"), 0, &ClearCol, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 14.0f, 0.0f, ColorRGBA(0.3f,0.1f,0.1f,0.8f)))
+	if(DoButton_Menu(&s_ClearButton, RCLocalize("Clear all"), 0, &ClearCol, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 14.0f, 0.0f, ColorRGBA(0.3f, 0.1f, 0.1f, 0.8f)))
 	{
 		g_Config.m_RiNamePlateScheme[0] = 0;
 		GameClient()->m_NamePlates.RiResetNameplatesPos(*GameClient(), g_Config.m_RiNamePlateScheme);
@@ -1263,8 +1287,7 @@ void CMenus::RenderSettingsRushieRCON(CUIRect MainView)
 
 	static CKeyInfo gs_aKeys[] =
 		{
-			{RCLocalize("Admin Panel"), "toggle_adminpanel", 0, 0}
-		};
+			{RCLocalize("Admin Panel"), "toggle_adminpanel", 0, 0}};
 
 	auto DoSettingsControlsButtons = [&](int Start, int Stop, CUIRect View) {
 		for(int i = Start; i < Stop; i++)
@@ -1323,7 +1346,6 @@ void CMenus::RenderSettingsRushieRCON(CUIRect MainView)
 	Ui()->DoLabel(&Label, RCLocalize("Adminpanel"), HeadlineFontSize, TEXTALIGN_MC);
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_RiPlaySounds, RCLocalize("Plays sound at exec command"), &g_Config.m_RiPlaySounds, &Column, LineSize);
-
 
 	LeftView = Column;
 	Column = RightView;
@@ -1408,4 +1430,3 @@ bool CMenus::DoFloatScrollBar(const void *pId, int *pOption, const CUIRect *pRec
 	}
 	return false;
 }
-

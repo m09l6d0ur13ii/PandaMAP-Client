@@ -10,7 +10,6 @@ class CAdminPanel : public CComponent
 
 	static void ConToggleAdminPanel(IConsole::IResult *pResult, void *pUserData);
 
-
 	vec2 m_PlayerScreenPos;
 	vec2 m_ClosestScreenPlayerPos;
 	int m_HoveredPlayerId = -1;
@@ -146,7 +145,6 @@ class CAdminPanel : public CComponent
 	void RenderPlayerPanelPopUpCommand(CUIRect *pBase);
 	void RenderPlayerPanelPopUpLastConfirm(CUIRect *pBase);
 	void RenderPlayerPanelPlayersList();
-
 
 	bool Hovered(const CUIRect *pRect) const
 	{

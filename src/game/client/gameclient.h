@@ -65,8 +65,8 @@
 
 //Rclient
 #include "components/rclient/adminpanel.h"
-#include "components/rclient/chat_bubbles.h"
 #include "components/rclient/bindwheel.h"
+#include "components/rclient/chat_bubbles.h"
 #include "components/rclient/rclient.h"
 
 //Tater

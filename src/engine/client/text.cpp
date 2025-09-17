@@ -2442,7 +2442,6 @@ public:
 		dbg_assert(!HasNonEmptyTextContainer, "text container was not empty");
 	}
 
-
 	ColorRGBA HSVtoRGB(float h, float s, float v) override
 	{
 		float r = 0, g = 0, b = 0;

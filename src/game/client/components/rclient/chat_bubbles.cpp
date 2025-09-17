@@ -38,7 +38,7 @@ void CChatBubbles::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 		if(g_Config.m_TcRegexChatIgnore[0] && g_Config.m_RiEnableCensorList)
 		{
-			const char* pMessage = GameClient()->m_Chat.FilterText(pMsg->m_pMessage);
+			const char *pMessage = GameClient()->m_Chat.FilterText(pMsg->m_pMessage);
 			AddBubble(pMsg->m_ClientId, pMsg->m_Team, pMessage);
 		}
 		else
@@ -97,7 +97,7 @@ void CChatBubbles::AddBubble(int ClientId, int Team, const char *pText)
 			return;
 		if(g_Config.m_ClShowChatTeamMembersOnly && GameClient()->IsOtherTeam(ClientId) && GameClient()->m_Teams.Team(GameClient()->m_Snap.m_LocalClientId) != TEAM_FLOCK)
 			return;
-		if( GameClient()->m_aClients[ClientId].m_Foe)
+		if(GameClient()->m_aClients[ClientId].m_Foe)
 			return;
 	}
 
@@ -299,7 +299,7 @@ void CChatBubbles::RenderChatBubbles(int ClientId)
 float CChatBubbles::ShiftBubbles(int ClientId, vec2 Pos, float w)
 {
 	//if(!g_Config.m_ClChatBubblePushOut)
-		return 0.0f;
+	return 0.0f;
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -339,7 +339,6 @@ void CChatBubbles::ExpireBubbles()
 	// If needed, it should iterate through all clients and remove expired bubbles
 }
 
-
 float CChatBubbles::GetAlpha(int64_t Time)
 {
 	const float FadeOutTime = g_Config.m_RiChatBubbleFadeOut / 100.0f;
@@ -355,7 +354,7 @@ float CChatBubbles::GetAlpha(int64_t Time)
 	float FadeOutProgress = (LineAge - (ShowTime - FadeOutTime)) / FadeOutTime;
 	return std::clamp(1.0f - FadeOutProgress, 0.0f, 1.0f);
 }
- 
+
 void CChatBubbles::OnRender()
 {
 	if(m_UseChatBubbles != g_Config.m_RiChatBubbles)

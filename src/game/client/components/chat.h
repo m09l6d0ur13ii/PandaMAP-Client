@@ -173,9 +173,8 @@ class CChat : public CComponent
 	friend class CChatBubbles;
 
 public:
-
 	// Private helper method for filtering text
-	const char* FilterText(const char* pMessage, int ClientId = -2, bool IsChat = false);
+	const char *FilterText(const char *pMessage, int ClientId = -2, bool IsChat = false);
 
 	bool LineShouldHighlight(const char *pLine, const char *pName); //Rclient
 

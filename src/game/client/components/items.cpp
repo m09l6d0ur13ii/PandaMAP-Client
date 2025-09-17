@@ -414,14 +414,14 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 
 			float Ms = TicksBody * 1000.0f / Client()->GameTickSpeed();
 			float a;
-		if(Type == LASERTYPE_RIFLE || Type == LASERTYPE_SHOTGUN)
-		{
-			a = Ms / GameClient()->GetTuning(TuneZone)->m_LaserBounceDelay;
-		}
-		else
-		{
-			a = Ms / CTuningParams::DEFAULT.m_LaserBounceDelay;
-		}
+			if(Type == LASERTYPE_RIFLE || Type == LASERTYPE_SHOTGUN)
+			{
+				a = Ms / GameClient()->GetTuning(TuneZone)->m_LaserBounceDelay;
+			}
+			else
+			{
+				a = Ms / CTuningParams::DEFAULT.m_LaserBounceDelay;
+			}
 			a = std::clamp(a, 0.0f, 1.0f);
 			float Ia = 1 - a;
 

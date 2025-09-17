@@ -53,6 +53,7 @@ public:
 			m_Bind = CBind(pName, pCommand);
 		}
 	};
+
 private:
 	static void ConAddBindchat(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddBindchatEx(IConsole::IResult *pResult, void *pUserData);

@@ -1502,6 +1502,7 @@ set(EXPECTED_DATA
   fonts/DejaVuSans.ttf
   fonts/Font_Awesome_6_Free-Solid-900.otf
   fonts/GlowSansJ-Compressed-Book.otf
+  fonts/NotoEmoji-Regular.ttf
   fonts/SourceHanSans.ttc
   fonts/index.json
   game.png
@@ -2562,6 +2563,8 @@ if(CLIENT)
     components/tclient/bindwheel.h
     components/tclient/conditional.cpp
     components/tclient/conditional.h
+    components/tclient/custom_communities.cpp
+    components/tclient/custom_communities.h
     components/tclient/data_version.h
     components/tclient/menus_tclient.cpp
     components/tclient/mod.cpp

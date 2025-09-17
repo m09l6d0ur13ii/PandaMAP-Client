@@ -31,11 +31,6 @@ public:
 
 static const char *GetUpdaterUrl(char *pBuf, int BufSize, const char *pFile)
 {
-	if(!str_comp(pFile, PLAT_CLIENT_DOWN))
-	{
-		str_copy(pBuf, "https://client.rushie.netcraze.link/download/rclient.exe", BufSize);
-		return pBuf;
-	}
 	str_format(pBuf, BufSize, "https://update.tclient.app/%s", pFile);
 	return pBuf;
 }
@@ -221,7 +216,7 @@ bool CUpdater::ReplaceServer()
 	bool Success = true;
 	char aPath[IO_MAX_PATH_LENGTH];
 
-	// Replace running executable by renaming twice...
+	//Replace running executable by renaming twice...
 	m_pStorage->RemoveBinaryFile(SERVER_EXEC ".old");
 	Success &= m_pStorage->RenameBinaryFile(PLAT_SERVER_EXEC, SERVER_EXEC ".old");
 	str_format(aPath, sizeof(aPath), "update/%s", m_aServerExecTmp);
@@ -251,61 +246,31 @@ void CUpdater::ParseUpdate()
 	json_value *pVersions = json_parse((json_char *)pBuf, Length);
 	free(pBuf);
 
-	dbg_msg("Updater", "Update Parsing");
-	dbg_msg("Updater", "Current version: %s", TCLIENT_VERSION);
-
 	if(pVersions && pVersions->type == json_array)
 	{
-		// Always set client update to true to download from custom URL
-		m_ClientUpdate = true;
-
-		// Check if we need to update other files
-		bool NeedUpdate = false;
 		for(int i = 0; i < json_array_length(pVersions); i++)
 		{
+			const json_value *pTemp;
 			const json_value *pCurrent = json_array_get(pVersions, i);
-			const char *pVersion = json_string_get(json_object_get(pCurrent, "version"));
-			dbg_msg("Updater", "Check version %s > %s", pVersion, TCLIENT_VERSION);
 			if(str_comp(json_string_get(json_object_get(pCurrent, "version")), TCLIENT_VERSION))
 			{
-				NeedUpdate = true;
-				dbg_msg("Updater", "Tclient Update");
-				break;
+				if(json_boolean_get(json_object_get(pCurrent, "client")))
+					m_ClientUpdate = true;
+				if(json_boolean_get(json_object_get(pCurrent, "server")))
+					m_ServerUpdate = true;
+				if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
+				{
+					for(int j = 0; j < json_array_length(pTemp); j++)
+						AddFileJob(json_string_get(json_array_get(pTemp, j)), true);
+				}
+				if((pTemp = json_object_get(pCurrent, "remove"))->type == json_array)
+				{
+					for(int j = 0; j < json_array_length(pTemp); j++)
+						AddFileJob(json_string_get(json_array_get(pTemp, j)), false);
+				}
 			}
 			else
-			{
-				dbg_msg("Updater", "Tclient doesn't need Update");
 				break;
-			}
-		}
-
-		// Only download other files if we need an update
-		if(NeedUpdate)
-		{
-			for(int i = 0; i < json_array_length(pVersions); i++)
-			{
-				const json_value *pTemp;
-				const json_value *pCurrent = json_array_get(pVersions, i);
-				dbg_msg("Updater", "Update or not %s > %s", json_string_get(json_object_get(pCurrent, "version")), TCLIENT_VERSION);
-				if(str_comp(json_string_get(json_object_get(pCurrent, "version")), TCLIENT_VERSION))
-				{
-					dbg_msg("Updater", "%s is newer", json_string_get(json_object_get(pCurrent, "version")));
-					if(json_boolean_get(json_object_get(pCurrent, "server")))
-						m_ServerUpdate = true;
-					if((pTemp = json_object_get(pCurrent, "download"))->type == json_array)
-					{
-						for(int j = 0; j < json_array_length(pTemp); j++)
-							AddFileJob(json_string_get(json_array_get(pTemp, j)), true);
-					}
-					if((pTemp = json_object_get(pCurrent, "remove"))->type == json_array)
-					{
-						for(int j = 0; j < json_array_length(pTemp); j++)
-							AddFileJob(json_string_get(json_array_get(pTemp, j)), false);
-					}
-				}
-				else
-					break;
-			}
 		}
 	}
 	json_value_free(pVersions);

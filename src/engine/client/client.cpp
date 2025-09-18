@@ -1845,7 +1845,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		else if(Msg == NETMSG_RUSHIE_CHECKSUM_REQUEST)
 		{
 #ifndef RUSHIE_CHECKSUM_SALT
-// salt@rushie-client.ru: c1a9a681-3a20-4a4b-9e89-27733e89b23c
+// salt@rushieclient.github.io: c1a9a681-3a20-4a4b-9e89-27733e89b23c
 #define RUSHIE_CHECKSUM_SALT \
 	{ \
 		{ \

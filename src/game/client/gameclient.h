@@ -287,15 +287,6 @@ private:
 
 	char m_aDDNetVersionStr[64];
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
-	static void ConFindSkin(IConsole::IResult *pResult, void *pUserData);
-	static void ConCopySkin(IConsole::IResult *pResult, void *pUserData);
-	static void ConFindPlayer(IConsole::IResult *pResult, void *pUserData);
-	static void ConCopyPlayer(IConsole::IResult *pResult, void *pUserData);
-	static void ConCopyColor(IConsole::IResult *pResult, void *pUserData);
-	static void ConTargetPlayerPos(IConsole::IResult *pResult, void *pUserData);
-	static void ConTargetPlayerPosReset(IConsole::IResult *pResult, void *pUserData);
-	static void ConTargetPlayerPosRemove(IConsole::IResult *pResult, void *pUserData);
-	static void ConAddCensorList(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
 	static void ConReadyChange7(IConsole::IResult *pResult, void *pUserData);
 

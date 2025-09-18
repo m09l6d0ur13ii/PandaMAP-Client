@@ -1733,14 +1733,14 @@ const char *CChat::FilterText(const char *pMessage, int ClientId, bool IsChat)
 	s_aFilteredMessage[0] = '\0';
 	if(g_Config.m_RiRegexPlayerWhitelist[0] && ClientId >= 0)
 	{
-		std::vector<std::string> SplitPlayers = CRClient::SplitRegex(g_Config.m_RiRegexPlayerWhitelist);
+		std::vector<std::string> SplitPlayers = GameClient()->m_RClient.GetWordsListRegex(1);
 		for(size_t i = 0; i < SplitPlayers.size(); i++)
 		{
 			if(!str_comp(GameClient()->m_aClients[ClientId].m_aName, SplitPlayers[i].c_str()))
 				return pMessage;
 		}
 	}
-	std::vector<std::string> SplitRegex = CRClient::SplitRegex(g_Config.m_TcRegexChatIgnore);
+	std::vector<std::string> SplitRegex = GameClient()->m_RClient.GetWordsListRegex(0);
 	std::vector<std::string> SplitMsg = CRClient::SplitWords(pMessage);
 	std::vector<std::string> BlockedWords;
 	bool Isbadwordinclude = false;

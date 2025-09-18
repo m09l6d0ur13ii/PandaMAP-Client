@@ -29,6 +29,40 @@ class CRClient : public CComponent
 
 	static void ConAddWhiteList(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConUpdateRegexIgnore(IConsole::IResult *pResult, void *pUserData);
+
+	//45 degrees
+	int m_45degreestoggle = 0;
+	int m_45degreestogglelastinput = 0;
+	int m_45degreesEnabled = 0;
+	// Small sens
+	int m_Smallsenstoggle = 0;
+	int m_Smallsenstogglelastinput = 0;
+	int m_SmallsensEnabled = 0;
+	//Deepfly
+	int m_DeepflyEnabled = 0;
+	char m_Oldmouse1Bind[128];
+
+	// GetInfofromDDstats
+	std::shared_ptr<CHttpRequest> m_pRClientDDstatsTask = nullptr;
+	void FetchRclientDDstatsProfile();
+	void FinishRclientDDstatsProfile();
+	void ResetRclientDDstatsProfile();
+	char RclientSearchingNickname[16];
+	int RclientFindSkinDDstatsSearch = 0;
+	int RclientCopySkinDDstatsSearch = 0;
+	int RclientFindPlayerDDstatsSearch = 0;
+	int RclientCopyPlayerDDstatsSearch = 0;
+
+	static void ConFindSkin(IConsole::IResult *pResult, void *pUserData);
+	static void ConCopySkin(IConsole::IResult *pResult, void *pUserData);
+	static void ConFindPlayer(IConsole::IResult *pResult, void *pUserData);
+	static void ConCopyPlayer(IConsole::IResult *pResult, void *pUserData);
+	static void ConCopyColor(IConsole::IResult *pResult, void *pUserData);
+	static void ConTargetPlayerPos(IConsole::IResult *pResult, void *pUserData);
+	static void ConTargetPlayerPosReset(IConsole::IResult *pResult, void *pUserData);
+	static void ConTargetPlayerPosRemove(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddCensorList(IConsole::IResult *pResult, void *pUserData);
 public:
 	CRClient();
 	int Sizeof() const override { return sizeof(*this); }
@@ -42,17 +76,6 @@ public:
 	static constexpr const char *RCLIENT_TOKEN_URL = "https://server.rushie-client.ru/token";
 	char m_aVersionStr[10] = "0";
 	char m_aAuthToken[128] = {0};
-
-	// GetInfofromDDstats
-	std::shared_ptr<CHttpRequest> m_pRClientDDstatsTask = nullptr;
-	void FetchRclientDDstatsProfile();
-	void FinishRclientDDstatsProfile();
-	void ResetRclientDDstatsProfile();
-	char RclientSearchingNickname[16];
-	int RclientFindSkinDDstatsSearch = 0;
-	int RclientCopySkinDDstatsSearch = 0;
-	int RclientFindPlayerDDstatsSearch = 0;
-	int RclientCopyPlayerDDstatsSearch = 0;
 
 	std::shared_ptr<CHttpRequest> m_pRClientVersionCheck = nullptr;
 	void FetchRclientVersionCheck();
@@ -116,24 +139,15 @@ public:
 	void FinishFindHours();
 	void ResetFindHours();
 
-	//45 degrees
-	int m_45degreestoggle = 0;
-	int m_45degreestogglelastinput = 0;
-	int m_45degreesEnabled = 0;
-	// Small sens
-	int m_Smallsenstoggle = 0;
-	int m_Smallsenstogglelastinput = 0;
-	int m_SmallsensEnabled = 0;
-	//Deepfly
-	int m_DeepflyEnabled = 0;
-	char m_Oldmouse1Bind[128];
-
 	// Copy nickname
 	void RiCopyNicknamePlayer(const char *pNickname);
 
 	// Regex
 	static std::vector<std::string> SplitRegex(const char *aboba);
 	static std::vector<std::string> SplitWords(const char *MSG);
+	std::vector<std::string> m_RegexSplited;
+	std::vector<std::string> m_RegexSplitedPlayer;
+	void RiSplitRegex() const;
 
 	// Server and Player Info Collection
 	std::shared_ptr<CHttpRequest> m_pRClientUsersTaskSend = nullptr;
@@ -153,6 +167,8 @@ public:
 	bool s_InitialFetchDone = false;
 	bool s_InitialFetchDoneDummy = false;
 	int s_RclientIndicatorCount = 0;
+
+	std::vector<std::string> GetWordsListRegex(int IsPlayer) const;
 };
 
 #endif

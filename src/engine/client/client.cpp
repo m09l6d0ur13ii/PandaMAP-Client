@@ -207,7 +207,7 @@ int CClient::SendMsgActive(CMsgPacker *pMsg, int Flags)
 
 void CClient::SendRClientInfo(int Conn)
 {
-	CMsgPacker Msg(NETMSG_IAMTATER, true);
+	CMsgPacker Msg(NETMSG_IAMRUSHIE, true);
 	Msg.AddString(RCLIENT_VERSION " built on " __DATE__ ", " __TIME__);
 	SendMsg(Conn, &Msg, MSGFLAG_VITAL);
 }
@@ -1842,15 +1842,15 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				SendMsg(Conn, &MsgP, MSGFLAG_VITAL);
 			}
 		}
-		else if(Msg == NETMSG_TATER_CHECKSUM_REQUEST)
+		else if(Msg == NETMSG_RUSHIE_CHECKSUM_REQUEST)
 		{
-#ifndef TCLIENT_CHECKSUM_SALT
-// salt@sjrc6.github.io: 26e65800-d8d9-3e8f-8d53-acdd1461f0a9
-#define TCLIENT_CHECKSUM_SALT \
+#ifndef RUSHIE_CHECKSUM_SALT
+// salt@rushie-client.ru: c1a9a681-3a20-4a4b-9e89-27733e89b23c
+#define RUSHIE_CHECKSUM_SALT \
 	{ \
 		{ \
-			0x26, 0xe6, 0x58, 0x00, 0xd8, 0xd9, 0x3e, 0x8f, \
-				0x8d, 0x53, 0xac, 0xdd, 0x14, 0x61, 0xf0, 0xa9, \
+			0xc1, 0xa9, 0xa6, 0x81, 0x3a, 0x20, 0x4a, 0x4b, \
+				0x9e, 0x89, 0x27, 0x73, 0x3e, 0x89, 0xb2, 0x3c, \
 		} \
 	}
 #endif
@@ -1861,12 +1861,12 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			}
 			SHA256_CTX Sha256Ctxt;
 			sha256_init(&Sha256Ctxt);
-			CUuid Salt = TCLIENT_CHECKSUM_SALT;
+			CUuid Salt = RUSHIE_CHECKSUM_SALT;
 			sha256_update(&Sha256Ctxt, &Salt, sizeof(Salt));
 			sha256_update(&Sha256Ctxt, pUuid, sizeof(*pUuid));
 			SHA256_DIGEST Sha256 = sha256_finish(&Sha256Ctxt);
 
-			CMsgPacker CSMsg(NETMSG_TATER_CHECKSUM_RESPONSE, true);
+			CMsgPacker CSMsg(NETMSG_RUSHIE_CHECKSUM_RESPONSE, true);
 			CSMsg.AddRaw(pUuid, sizeof(*pUuid));
 			CSMsg.AddRaw(&Sha256, sizeof(Sha256));
 			SendMsg(Conn, &CSMsg, MSGFLAG_VITAL);
@@ -3308,7 +3308,7 @@ void CClient::Run()
 		if(m_DummySendConnInfo && m_aNetClient[CONN_DUMMY].State() == NETSTATE_ONLINE)
 		{
 			m_DummySendConnInfo = false;
-
+			
 			// send client info
 			SendRClientInfo(CONN_DUMMY);
 

@@ -132,32 +132,32 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 			Client()->Quit();
 	}
 
-	// --- Версии снизу справа ---
-	CUIRect VersionBlock;
-	MainView.HSplitBottom(80.0f, &MainView, &VersionBlock);
-	VersionBlock.VSplitLeft(MainView.w - 200.0f, &MainView, &VersionBlock);
+// --- Версии снизу справа ---
+CUIRect VersionBlock;
+MainView.HSplitBottom(80.0f, &MainView, &VersionBlock);
+VersionBlock.VSplitLeft(MainView.w - 200.0f, &MainView, &VersionBlock);
 
-	float FontSize = 14.0f;
-	float LineSpacing = 18.0f;
+float FontSize = 14.0f;
+float LineSpacing = 18.0f;
 
-	CUIRect LineBlock = VersionBlock;
-	char aBuf[64];
+CUIRect LineBlock = VersionBlock;
+char aBuf[64];
 
-	str_format(aBuf, sizeof(aBuf), "DDNet %s", GAME_RELEASE_VERSION);
-	Ui()->DoLabel(&LineBlock, aBuf, FontSize, TEXTALIGN_MR);
-	LineBlock.y += LineSpacing;
+str_format(aBuf, sizeof(aBuf), "DDNet %s", GAME_RELEASE_VERSION);
+Ui()->DoLabel(&LineBlock, aBuf, FontSize, TEXTALIGN_MR);
+LineBlock.y += LineSpacing;
 
-	str_format(aBuf, sizeof(aBuf), "TClient %s", TCLIENT_VERSION);
-	Ui()->DoLabel(&LineBlock, aBuf, FontSize, TEXTALIGN_MR);
-	LineBlock.y += LineSpacing;
+str_format(aBuf, sizeof(aBuf), "TClient %s", TCLIENT_VERSION);
+Ui()->DoLabel(&LineBlock, aBuf, FontSize, TEXTALIGN_MR);
+LineBlock.y += LineSpacing;
 
-	str_format(aBuf, sizeof(aBuf), "RClient %s", RCLIENT_VERSION);
-	Ui()->DoLabel(&LineBlock, aBuf, FontSize, TEXTALIGN_MR);
+str_format(aBuf, sizeof(aBuf), "RClient %s", RCLIENT_VERSION);
+Ui()->DoLabel(&LineBlock, aBuf, FontSize, TEXTALIGN_MR);
 
+#if defined(CONF_AUTOUPDATE)
 	// --- Для автообновления используем тот же блок ---
 	CUIRect VersionUpdate = VersionBlock;
 
-#if defined(CONF_AUTOUPDATE)
 	CUIRect UpdateButton;
 	VersionUpdate.VSplitRight(100.0f, &VersionUpdate, &UpdateButton);
 	VersionUpdate.VSplitRight(10.0f, &VersionUpdate, nullptr);
@@ -220,7 +220,7 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 		char aBuf2[64];
 		str_format(aBuf2, sizeof(aBuf2), Localize("DDNet %s is out!"), Client()->LatestVersion());
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
-		Ui()->DoLabel(&VersionUpdate, aBuf2, 14.0f, TEXTALIGN_MC);
+		Ui()->DoLabel(&VersionBlock, aBuf2, 14.0f, TEXTALIGN_MC);
 	}
 #endif
 

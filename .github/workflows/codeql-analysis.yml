@@ -1,12 +1,13 @@
 name: "CodeQL"
 
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
-  schedule:
-    - cron: '0 13 * * 0'
+# Workflow временно отключЄн Ч триггер закомментирован
+# on:
+#   push:
+#     branches: [master]
+#   pull_request:
+#     branches: [master]
+#   schedule:
+#     - cron: '0 13 * * 0'
 
 permissions:
   actions: read

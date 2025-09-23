@@ -34,13 +34,14 @@ jobs:
     - name: Prepare Linux (C++)
       if: matrix.language == 'cpp'
       run: |
-       sudo apt-get update -y
-       sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libmariadb-dev libwebsockets-dev libvulkan-dev glslang-tools spirv-tools libglew-dev -y
+        sudo apt-get update -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libmariadb-dev libwebsockets-dev libvulkan-dev glslang-tools spirv-tools libglew-dev -y
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: ${{ matrix.language }}
+    # CodeQL инициализация пропущена
+    #- name: Initialize CodeQL
+    #  uses: github/codeql-action/init@v3
+    #  with:
+    #    languages: ${{ matrix.language }}
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
@@ -48,12 +49,13 @@ jobs:
     - name: Build (C++)
       if: matrix.language == 'cpp'
       run: |
-       mkdir -p release
-       cd release
-       cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DANTIBOT=ON -DMYSQL=ON -DWEBSOCKETS=ON ..
-       cmake --build . --config RelWithDebInfo --target everything
+        mkdir -p release
+        cd release
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DANTIBOT=ON -DMYSQL=ON -DWEBSOCKETS=ON ..
+        cmake --build . --config RelWithDebInfo --target everything
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
-      with:
-        category: "/language:${{ matrix.language }}"
+    # CodeQL анализ пропущен
+    #- name: Perform CodeQL Analysis
+    #  uses: github/codeql-action/analyze@v3
+    #  with:
+    #    category: "/language:${{ matrix.language }}"

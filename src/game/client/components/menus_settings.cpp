@@ -1846,7 +1846,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	{
 		MainView.HSplitTop(5.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
-		Ui()->DoScrollbarOption(&g_Config.m_SndVolume, &g_Config.m_SndVolume, &Button, Localize("Sound volume"), 0, 100, &CUi::ms_LogarithmicScrollbarScale, 0u, "%");
+		Ui()->DoScrollbarOption(&g_Config.m_SndVolume, &g_Config.m_SndVolume, &Button, Localize("Sound volume"), 0, 1000, &CUi::ms_LogarithmicScrollbarScale, 0u, "%");
 	}
 
 	// volume slider game sounds

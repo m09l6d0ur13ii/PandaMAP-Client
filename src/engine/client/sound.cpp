@@ -1,4 +1,5 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
+/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <SDL.h>
 
@@ -158,7 +159,8 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 
 	// clamp accumulated values
 	for(unsigned i = 0; i < Frames * 2; i++)
-		pFinalOut[i] = std::clamp<int>(((m_pMixBuffer[i] * MasterVol) / 101) >> 8, std::numeric_limits<short>::min(), std::numeric_limits<short>::max());
+		pFinalOut[i] = std::clamp<int>(((m_pMixBuffer[i] * MasterVol) / 10) >> 8, std::numeric_limits<short>::min(), std::numeric_limits<short>::max());
+
 
 #if defined(CONF_ARCH_ENDIAN_BIG)
 	swap_endian(pFinalOut, sizeof(short), Frames * 2);

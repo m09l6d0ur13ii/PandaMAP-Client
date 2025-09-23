@@ -856,28 +856,45 @@ void CRClient::ResetFindHours()
 	}
 }
 
-//45 degrees
+// 45 degrees toggle
 void CRClient::ConToggle45Degrees(IConsole::IResult *pResult, void *pUserData)
 {
 	CRClient *pSelf = static_cast<CRClient *>(pUserData);
 	pSelf->m_45degreestoggle = pResult->GetInteger(0) != 0;
+
+	// сохраняем предыдущее состояние лазера (своего)
+	static int s_PrevShowHookCollOwn = g_Config.m_ClShowHookCollOwn;
+
 	if(!g_Config.m_RiToggle45degrees)
 	{
 		if(pSelf->m_45degreestoggle && !pSelf->m_45degreestogglelastinput)
 		{
-			pSelf->GameClient()->Echo("[[green]] 45° on");
 			pSelf->m_45degreesEnabled = 1;
+			pSelf->GameClient()->Echo("[[green]] 45° on");
+
+			// сохраняем прошлые значения
 			g_Config.m_RiPrevInpMousesens45degrees = (pSelf->m_SmallsensEnabled == 1 ? g_Config.m_RiPrevInpMousesensSmallsens : g_Config.m_InpMousesens);
 			g_Config.m_RiPrevMouseMaxDistance45degrees = g_Config.m_ClMouseMaxDistance;
+
+			// устанавливаем новые значения
 			g_Config.m_ClMouseMaxDistance = 2;
 			g_Config.m_InpMousesens = 4;
+
+			// включаем постоянный лазер
+			s_PrevShowHookCollOwn = g_Config.m_ClShowHookCollOwn;
+			g_Config.m_ClShowHookCollOwn = 2; // всегда показывать
 		}
 		else if(!pSelf->m_45degreestoggle)
 		{
 			pSelf->m_45degreesEnabled = 0;
 			pSelf->GameClient()->Echo("[[red]] 45° off");
+
+			// возвращаем прежние значения
 			g_Config.m_ClMouseMaxDistance = g_Config.m_RiPrevMouseMaxDistance45degrees;
 			g_Config.m_InpMousesens = g_Config.m_RiPrevInpMousesens45degrees;
+
+			// возвращаем состояние лазера
+			g_Config.m_ClShowHookCollOwn = s_PrevShowHookCollOwn;
 		}
 		pSelf->m_45degreestogglelastinput = pSelf->m_45degreestoggle;
 	}
@@ -892,6 +909,9 @@ void CRClient::ConToggle45Degrees(IConsole::IResult *pResult, void *pUserData)
 				pSelf->GameClient()->Echo("[[red]] 45° off");
 				g_Config.m_ClMouseMaxDistance = g_Config.m_RiPrevMouseMaxDistance45degrees;
 				g_Config.m_InpMousesens = g_Config.m_RiPrevInpMousesens45degrees;
+
+				// возвращаем состояние лазера
+				g_Config.m_ClShowHookCollOwn = s_PrevShowHookCollOwn;
 			}
 			else
 			{
@@ -901,11 +921,17 @@ void CRClient::ConToggle45Degrees(IConsole::IResult *pResult, void *pUserData)
 				g_Config.m_RiPrevMouseMaxDistance45degrees = g_Config.m_ClMouseMaxDistance;
 				g_Config.m_ClMouseMaxDistance = 2;
 				g_Config.m_InpMousesens = 4;
+
+				// включаем постоянный лазер
+				s_PrevShowHookCollOwn = g_Config.m_ClShowHookCollOwn;
+				g_Config.m_ClShowHookCollOwn = 2; // всегда показывать
 			}
 		}
 		pSelf->m_45degreestogglelastinput = pSelf->m_45degreestoggle;
 	}
 }
+
+
 //Small sens toggle
 void CRClient::ConToggleSmallSens(IConsole::IResult *pResult, void *pUserData)
 {

@@ -1560,7 +1560,7 @@ void CHud::RenderDummyActions()
 	{
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	if(g_Config.m_PMDummyHammer)
+	if(g_Config.m_PmDummyHammer)
 	{
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}

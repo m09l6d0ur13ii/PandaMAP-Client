@@ -816,7 +816,7 @@ void CClient::DummyConnect()
 
 	g_Config.m_ClDummyCopyMoves = 0;
 	g_Config.m_ClDummyHammer = 0;
-	g_Config.m_PMDummyHammer = 0;
+	g_Config.m_PmDummyHammer = 0;
 
 	m_DummyConnecting = true;
 	// connect to the server
@@ -3309,7 +3309,7 @@ void CClient::Run()
 		if(m_DummySendConnInfo && m_aNetClient[CONN_DUMMY].State() == NETSTATE_ONLINE)
 		{
 			m_DummySendConnInfo = false;
-			
+
 			// send client info
 			SendRClientInfo(CONN_DUMMY);
 

@@ -11,11 +11,11 @@
 
 #include <generated/client_data.h>
 
+#include <game/client/animstate.h>
 #include <game/client/gameclient.h>
 #include <game/client/ui.h>
 #include <game/localization.h>
 #include <game/version.h>
-#include <game/client/animstate.h>
 
 #include "menus_start.h"
 
@@ -92,7 +92,7 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 
 	// --- Local server ---
 	Menu.HSplitTop(ButtonHeight, &Button, &Menu);
-static CButtonContainer s_LocalServerButton;
+	static CButtonContainer s_LocalServerButton;
 	const bool LocalServerRunning = GameClient()->m_LocalServer.IsServerRunning();
 	if(GameClient()->m_Menus.DoButton_Menu(&s_LocalServerButton, LocalServerRunning ? Localize("Stop server") : Localize("Run server"), 0, &Button, BUTTONFLAG_LEFT,
 		   g_Config.m_ClShowStartMenuImages ? "local_server" : nullptr,
@@ -134,8 +134,7 @@ static CButtonContainer s_LocalServerButton;
 			Client()->Quit();
 	}
 
-	
-	CUIRect PreviewLabel, PreviewRect, DummyCheckRect;
+	CUIRect PreviewLabel, PreviewRect;
 	Ui()->DoLabel(&PreviewLabel, RCLocalize("Preview:"), 14.0f, TEXTALIGN_ML);
 	PreviewRect.Margin(6.0f, &PreviewRect);
 	PreviewRect.Draw(ColorRGBA(0.12f, 0.12f, 0.12f, 0.7f), IGraphics::CORNER_ALL, 8.0f);
@@ -217,27 +216,27 @@ static CButtonContainer s_LocalServerButton;
 		}
 	}
 
-// --- Версии снизу справа ---
-CUIRect VersionBlock;
-MainView.HSplitBottom(80.0f, &MainView, &VersionBlock);
-VersionBlock.VSplitLeft(MainView.w - 200.0f, &MainView, &VersionBlock);
+	// --- Версии снизу справа ---
+	CUIRect VersionBlock;
+	MainView.HSplitBottom(80.0f, &MainView, &VersionBlock);
+	VersionBlock.VSplitLeft(MainView.w - 200.0f, &MainView, &VersionBlock);
 
-float FontSize = 14.0f;
-float LineSpacing = 18.0f;
+	float FontSize = 14.0f;
+	float LineSpacing = 18.0f;
 
-CUIRect LineBlock = VersionBlock;
-char aBuf[64];
+	CUIRect LineBlock = VersionBlock;
+	char aBuf[64];
 
-str_format(aBuf, sizeof(aBuf), "DDNet %s", GAME_RELEASE_VERSION);
-Ui()->DoLabel(&LineBlock, aBuf, FontSize, TEXTALIGN_MR);
-LineBlock.y += LineSpacing;
+	str_format(aBuf, sizeof(aBuf), "DDNet %s", GAME_RELEASE_VERSION);
+	Ui()->DoLabel(&LineBlock, aBuf, FontSize, TEXTALIGN_MR);
+	LineBlock.y += LineSpacing;
 
-str_format(aBuf, sizeof(aBuf), "TClient %s", TCLIENT_VERSION);
-Ui()->DoLabel(&LineBlock, aBuf, FontSize, TEXTALIGN_MR);
-LineBlock.y += LineSpacing;
+	str_format(aBuf, sizeof(aBuf), "TClient %s", TCLIENT_VERSION);
+	Ui()->DoLabel(&LineBlock, aBuf, FontSize, TEXTALIGN_MR);
+	LineBlock.y += LineSpacing;
 
-str_format(aBuf, sizeof(aBuf), "RClient %s", RCLIENT_VERSION);
-Ui()->DoLabel(&LineBlock, aBuf, FontSize, TEXTALIGN_MR);
+	str_format(aBuf, sizeof(aBuf), "RClient %s", RCLIENT_VERSION);
+	Ui()->DoLabel(&LineBlock, aBuf, FontSize, TEXTALIGN_MR);
 
 #if defined(CONF_AUTOUPDATE)
 	// --- Для автообновления используем тот же блок ---

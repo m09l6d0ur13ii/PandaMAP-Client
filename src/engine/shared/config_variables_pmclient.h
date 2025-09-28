@@ -7,6 +7,4 @@
 
 MACRO_CONFIG_INT(PmDummyHammer, pm_dummy_hammer, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Hammer Chicka")
 MACRO_CONFIG_INT(PmDummyHammerDelay, pm_dummy_hammer_delay, 25, 1, 1000, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Delay PM pm_dummy_hammer and cl_dummy_hammer hits")
-MACRO_CONFIG_INT(PmDummyKeepHookOnMove, pm_dummy_keep_Move, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Keep hook pressed during PM dummy hammer hit (0 = off, 1 = on)")
-MACRO_CONFIG_INT(PmDummyKeepHookOnJump, pm_dummy_keep_hook, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Keep hook pressed during PM dummy hammer hit (0 = off, 1 = on)")
 MACRO_CONFIG_INT(PmDummyKeepHookOnHammer, pm_dummy_keep_hook, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Keep hook pressed during PM dummy hammer hit (0 = off, 1 = on)")

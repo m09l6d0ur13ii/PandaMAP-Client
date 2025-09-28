@@ -63,6 +63,7 @@ class CRClient : public CComponent
 	static void ConTargetPlayerPosReset(IConsole::IResult *pResult, void *pUserData);
 	static void ConTargetPlayerPosRemove(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddCensorList(IConsole::IResult *pResult, void *pUserData);
+
 public:
 	CRClient();
 	int Sizeof() const override { return sizeof(*this); }

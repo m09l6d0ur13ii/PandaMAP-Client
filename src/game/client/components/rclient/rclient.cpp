@@ -931,7 +931,6 @@ void CRClient::ConToggle45Degrees(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-
 //Small sens toggle
 void CRClient::ConToggleSmallSens(IConsole::IResult *pResult, void *pUserData)
 {

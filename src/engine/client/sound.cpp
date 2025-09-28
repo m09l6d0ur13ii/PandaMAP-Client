@@ -161,7 +161,6 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 	for(unsigned i = 0; i < Frames * 2; i++)
 		pFinalOut[i] = std::clamp<int>(((m_pMixBuffer[i] * MasterVol) / 10) >> 8, std::numeric_limits<short>::min(), std::numeric_limits<short>::max());
 
-
 #if defined(CONF_ARCH_ENDIAN_BIG)
 	swap_endian(pFinalOut, sizeof(short), Frames * 2);
 #endif

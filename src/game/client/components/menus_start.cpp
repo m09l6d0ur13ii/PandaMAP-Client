@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <algorithm>
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/serverbrowser.h>
@@ -14,6 +15,7 @@
 #include <game/client/ui.h>
 #include <game/localization.h>
 #include <game/version.h>
+#include <game/client/animstate.h>
 
 #include "menus_start.h"
 
@@ -90,7 +92,7 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 
 	// --- Local server ---
 	Menu.HSplitTop(ButtonHeight, &Button, &Menu);
-	static CButtonContainer s_LocalServerButton;
+static CButtonContainer s_LocalServerButton;
 	const bool LocalServerRunning = GameClient()->m_LocalServer.IsServerRunning();
 	if(GameClient()->m_Menus.DoButton_Menu(&s_LocalServerButton, LocalServerRunning ? Localize("Stop server") : Localize("Run server"), 0, &Button, BUTTONFLAG_LEFT,
 		   g_Config.m_ClShowStartMenuImages ? "local_server" : nullptr,
@@ -130,6 +132,89 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 			GameClient()->m_Menus.ShowQuitPopup();
 		else
 			Client()->Quit();
+	}
+
+	
+	CUIRect PreviewLabel, PreviewRect, DummyCheckRect;
+	Ui()->DoLabel(&PreviewLabel, RCLocalize("Preview:"), 14.0f, TEXTALIGN_ML);
+	PreviewRect.Margin(6.0f, &PreviewRect);
+	PreviewRect.Draw(ColorRGBA(0.12f, 0.12f, 0.12f, 0.7f), IGraphics::CORNER_ALL, 8.0f);
+	static int showDummyPreview = false;
+	vec2 PreviewPos = vec2(PreviewRect.x + PreviewRect.w / 2, PreviewRect.y + PreviewRect.h * 0.45f);
+	GameClient()->m_NamePlates.RenderNamePlatePreview(PreviewPos, showDummyPreview ? 1 : 0);
+
+	// --- Центрируем меню ближе к центру экрана ---
+	const float CenterMargin = MainView.w / 2 - 200.0f; // Было 190, стало 140 (меню ближе к центру)
+	MainView.VMargin(CenterMargin, &Menu);
+
+	// --- Персонаж, смотрящий за курсором, справа от кнопок ---
+	{
+		const float CharPreviewW = std::clamp(MainView.w * 0.13f, 80.0f, 140.0f);
+		const float CharPreviewH = std::clamp(MainView.h * 0.28f, 90.0f, 180.0f);
+		CUIRect CharPreviewRect;
+		CharPreviewRect.x = Menu.x + Menu.w + 32.0f; // чуть больше отступ, чтобы визуально центрировать
+		CharPreviewRect.y = Button.y;
+		CharPreviewRect.w = CharPreviewW;
+		CharPreviewRect.h = CharPreviewH;
+
+		ColorRGBA bgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
+		CharPreviewRect.Draw(bgColor, IGraphics::CORNER_ALL, 10.0f);
+
+		const char *pSkinName = g_Config.m_ClPlayerSkin;
+		int UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
+		unsigned ColorBody = g_Config.m_ClPlayerColorBody;
+		unsigned ColorFeet = g_Config.m_ClPlayerColorFeet;
+		int Emote = g_Config.m_ClPlayerDefaultEyes;
+
+		const CSkin *pDefaultSkin = GameClient()->m_Skins.Find("default");
+		const CSkins::CSkinContainer *pOwnSkinContainer = GameClient()->m_Skins.FindContainerOrNullptr(pSkinName[0] == '\0' ? "default" : pSkinName);
+		if(pOwnSkinContainer != nullptr && pOwnSkinContainer->IsSpecial())
+		{
+			pOwnSkinContainer = nullptr;
+		}
+
+		CTeeRenderInfo OwnSkinInfo;
+		OwnSkinInfo.Apply(pOwnSkinContainer == nullptr || pOwnSkinContainer->Skin() == nullptr ? pDefaultSkin : pOwnSkinContainer->Skin().get());
+		OwnSkinInfo.ApplyColors(UseCustomColor, ColorBody, ColorFeet);
+		OwnSkinInfo.m_Size = 50.0f;
+
+		// --- Ник и клан над тишкой ---
+		CUIRect NameRect = CharPreviewRect;
+		NameRect.h = 16.0f;
+		NameRect.y -= 28.0f; // поднять над тишкой
+		char aNameBuf[64];
+		str_format(aNameBuf, sizeof(aNameBuf), "%s", g_Config.m_PlayerName);
+		Ui()->DoLabel(&NameRect, aNameBuf, 13.0f, TEXTALIGN_MC);
+		NameRect.y += 13.0f; // маленький отступ
+		char aClanBuf[64];
+		str_format(aClanBuf, sizeof(aClanBuf), "%s", g_Config.m_PlayerClan);
+		Ui()->DoLabel(&NameRect, aClanBuf, 10.0f, TEXTALIGN_MC); // клан меньше
+
+		vec2 OffsetToMid;
+		CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &OwnSkinInfo, OffsetToMid);
+		const vec2 TeeRenderPos = vec2(CharPreviewRect.x + CharPreviewRect.w / 2.0f, CharPreviewRect.y + CharPreviewRect.h * 0.32f + OffsetToMid.y);
+		const vec2 DeltaPosition = Ui()->MousePos() - TeeRenderPos;
+		const float Distance = length(DeltaPosition);
+		const float InteractionDistance = 20.0f;
+		const vec2 TeeDirection = Distance < InteractionDistance ? normalize(vec2(DeltaPosition.x, maximum(DeltaPosition.y, 0.5f))) : normalize(DeltaPosition);
+		const int TeeEmote = Distance < InteractionDistance ? EMOTE_HAPPY : Emote;
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, TeeEmote, TeeDirection, TeeRenderPos);
+
+		// --- Кнопка профиля под тишкой ---
+		CUIRect ProfileBtn;
+		float btnHeight = std::clamp(CharPreviewRect.h * 0.13f, 22.0f, 30.0f);
+		float btnWidth = std::clamp(CharPreviewRect.w * 0.85f, 40.0f, 90.0f);
+		CharPreviewRect.HSplitBottom(btnHeight + 6.0f, &CharPreviewRect, &ProfileBtn);
+		ProfileBtn.HMargin((ProfileBtn.h - btnHeight) / 2.0f, &ProfileBtn);
+		ProfileBtn.x = CharPreviewRect.x + (CharPreviewRect.w - btnWidth) / 2.0f;
+		ProfileBtn.w = btnWidth;
+		ProfileBtn.h = btnHeight;
+		static CButtonContainer s_ProfileBtn;
+		if(GameClient()->m_Menus.DoButton_Menu(&s_ProfileBtn, Localize("TClient Profiles"), 0, &ProfileBtn, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 8.0f, 0.5f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+		{
+			NewPage = CMenus::PAGE_SETTINGS;
+			g_Config.m_UiSettingsPage = CMenus::SETTINGS_PROFILES; // Открывает вкладку профилей TClient через глобальный конфиг
+		}
 	}
 
 // --- Версии снизу справа ---

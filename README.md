@@ -1,16 +1,14 @@
-### Rclient is fork of [TaterClient](https://github.com/sjrc6/TaterClient-ddnet)
+### is fork of [Rushie](https://github.com/RushieClient/RushieClient-ddnet)
+### is fork of [TaterClient](https://github.com/sjrc6/TaterClient-ddnet)
 
 Not guarenteed to be bug free, but I will try to fix them.
 
-### Links
+--------
 
-[Discord](https://discord.gg/wUFTVAGVGa)
-[Website](https://rushie-client.ru/)
+install
 
-### Installation
+git clone https://github.com/m09l6d0ur13ii/PandaMAP-Client.git
 
-* Download the latest [release](https://github.com/Rushie-Client/RushieClient-ddnet/releases)
+git submodule update --init --recursive
 
-### Features
-
-That client add all features of TClient, some of Pulse Client and some features of RushieClient
+Потом собираем Cmake

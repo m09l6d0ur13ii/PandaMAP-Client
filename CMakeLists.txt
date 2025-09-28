@@ -1634,6 +1634,7 @@ set(EXPECTED_DATA
   menuimages/editor.png
   menuimages/local_server.png
   menuimages/play_game.png
+  menuimages/quit_btn.png
   menuimages/settings.png
   particles.png
   race_flag.png
@@ -3303,7 +3304,6 @@ add_custom_target(run_rust_tests
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   USES_TERMINAL
   DEPENDS rust_test
-  VERBATIM
 )
 
 ########################################################################
@@ -3506,7 +3506,7 @@ set(CPACK_GEN_FILES
 if(TARGET_OS STREQUAL "windows")
   list(APPEND CPACK_FILES other/config_directory.bat)
 else()
-  list(APPEND CPACK_FILES other/config_directory.sh)
+  set(CPACK_FILES other/config_directory.sh)
 endif()
 
 if(NOT DEV)
@@ -3530,10 +3530,10 @@ if(NOT DEV)
   endif()
   foreach(SIZE 16 32 48 256)
     if(TARGET game-client)
-      install(FILES other/icons/DDNet_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet.png COMPONENT client)
+      install(FILES other/icons/${CLIENT_EXECUTABLE}_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet.png COMPONENT client)
     endif()
     if(TARGET game-server)
-      install(FILES other/icons/DDNet-Server_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet-server.png COMPONENT server)
+      install(FILES other/icons/${SERVER_EXECUTABLE}_${SIZE}x${SIZE}x32.png DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SIZE}x${SIZE}/apps RENAME ddnet-server.png COMPONENT server)
     endif()
   endforeach()
   foreach(file ${VULKAN_SHADER_FILE_LIST})
@@ -3584,6 +3584,7 @@ if(CLIENT AND DMGBUILD)
 
   add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.dmg
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${DMG_TMPDIR}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${DMG_TMPDIR}
     ${DMG_MKDIR_COMMANDS}
 
     # CLIENT
@@ -3862,13 +3863,6 @@ foreach(target ${TARGETS_OWN})
   # if(VERSION)
   #   target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION_INTERNAL=${VERSION})
   # endif()
-  if(TARGET_OS STREQUAL "android")
-    if(ANDROID_PACKAGE_NAME)
-      target_compile_definitions(${target} PRIVATE ANDROID_PACKAGE_NAME=${ANDROID_PACKAGE_NAME})
-    else()
-      message(FATAL_ERROR "ANDROID_PACKAGE_NAME must define the package name when compiling for Android (using underscores instead of dots, e.g. org_example_app)")
-    endif()
-  endif()
 endforeach()
 
 foreach(target ${TARGETS_DEP})

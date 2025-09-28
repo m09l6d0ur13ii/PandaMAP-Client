@@ -80,6 +80,7 @@
 #include "components/voting.h"
 #include "prediction/entities/character.h"
 #include "prediction/entities/projectile.h"
+#include <algorithm>
 
 using namespace std::chrono_literals;
 
@@ -210,6 +211,11 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself to restart");
 	Console()->Register("ready_change", "", CFGFLAG_CLIENT, ConReadyChange7, this, "Change ready state (0.7 only)");
+	// pm_dummy_hammer_delay | Create PM
+	Console()->Register("pm_dummy_hammer_delay", "i[delay]", CFGFLAG_CLIENT, [](IConsole::IResult *pResult, void *pUserData) {
+	int delay = std::clamp(pResult->GetInteger(0), 1, 1000);
+	g_Config.m_PmDummyHammerDelay = delay; }, this, "Set delay (in ticks) between PM dummy hammer hits");
+	Console()->Register("pm_dummy_keep_hook", "i[0/1]", CFGFLAG_CLIENT, [](IConsole::IResult *pResult, void *pUserData) { g_Config.m_PMDummyKeepHookOnHammer = pResult->GetInteger(0) ? 1 : 0; }, this, "Включить/выключить удержание хука у dummy во время удара молотом");
 
 	// register game commands to allow the client prediction to load settings from the map
 	Console()->Register("tune", "s[tuning] ?f[value]", CFGFLAG_GAME, ConTuneParam, this, "Tune variable to value");
@@ -561,25 +567,50 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		return 0;
 	}
 
-	if(!g_Config.m_ClDummyHammer)
+	// Ваш новый бинд
+	if(g_Config.m_PMDummyHammer)
 	{
-		if(m_DummyFire != 0)
+		bool DoHammer = (m_DummyFire % g_Config.m_PmDummyHammerDelay == 0);
+		m_DummyFire++;
+
+		m_HammerInput.m_Direction = m_DummyInput.m_Direction;
+		m_HammerInput.m_Jump = m_DummyInput.m_Jump;
+		if(g_Config.m_PMDummyKeepHookOnHammer)
+			m_HammerInput.m_Hook = m_DummyInput.m_Hook;
+		else
+			m_HammerInput.m_Hook = 0;
+
+		const vec2 Dir = m_LocalCharacterPos - m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
+		m_HammerInput.m_TargetX = (int)Dir.x;
+		m_HammerInput.m_TargetY = (int)Dir.y;
+
+		int CurrentWeapon = m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Predicted.m_ActiveWeapon;
+		if(CurrentWeapon != WEAPON_HAMMER)
+			m_HammerInput.m_WantedWeapon = WEAPON_HAMMER + 1;
+		else
+			m_HammerInput.m_WantedWeapon = WEAPON_HAMMER;
+
+		if(DoHammer)
 		{
-			m_DummyInput.m_Fire = (m_HammerInput.m_Fire + 1) & ~1;
-			m_DummyFire = 0;
+			m_HammerInput.m_Fire = (m_HammerInput.m_Fire + 1) | 1;
+			if(!g_Config.m_ClDummyRestoreWeapon)
+			{
+				m_DummyInput.m_WantedWeapon = WEAPON_HAMMER + 1;
+			}
+		}
+		else
+		{
+			m_HammerInput.m_Fire = 0;
 		}
 
-		if(!Force && (!m_DummyInput.m_Direction && !m_DummyInput.m_Jump && !m_DummyInput.m_Hook))
-		{
-			return 0;
-		}
-
-		mem_copy(pData, &m_DummyInput, sizeof(m_DummyInput));
-		return sizeof(m_DummyInput);
+		mem_copy(pData, &m_HammerInput, sizeof(m_HammerInput));
+		return sizeof(m_HammerInput);
 	}
-	else
+
+	// Старый бинд
+	if(g_Config.m_ClDummyHammer)
 	{
-		if(m_DummyFire % 25 != 0)
+		if(m_DummyFire % g_Config.m_PmDummyHammerDelay != 0)
 		{
 			m_DummyFire++;
 			return 0;
@@ -600,6 +631,21 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		mem_copy(pData, &m_HammerInput, sizeof(m_HammerInput));
 		return sizeof(m_HammerInput);
 	}
+
+	// Обычное поведение dummy
+	if(m_DummyFire != 0)
+	{
+		m_DummyInput.m_Fire = (m_HammerInput.m_Fire + 1) & ~1;
+		m_DummyFire = 0;
+	}
+
+	if(!Force && (!m_DummyInput.m_Direction && !m_DummyInput.m_Jump && !m_DummyInput.m_Hook))
+	{
+		return 0;
+	}
+
+	mem_copy(pData, &m_DummyInput, sizeof(m_DummyInput));
+	return sizeof(m_DummyInput);
 }
 
 void CGameClient::OnConnected()

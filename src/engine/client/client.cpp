@@ -816,6 +816,7 @@ void CClient::DummyConnect()
 
 	g_Config.m_ClDummyCopyMoves = 0;
 	g_Config.m_ClDummyHammer = 0;
+	g_Config.m_PMDummyHammer = 0;
 
 	m_DummyConnecting = true;
 	// connect to the server

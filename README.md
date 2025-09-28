@@ -5,10 +5,19 @@ Not guarenteed to be bug free, but I will try to fix them.
 
 --------
 
-install
+# Cloning repo
+```
+git clone --depth 1 --recursive --shallow-submodules https://github.com/m09l6d0ur13ii/PandaMAP-Client.git
+```
 
-git clone https://github.com/m09l6d0ur13ii/PandaMAP-Client.git
-
+```bash
 git submodule update --init --recursive
+```
 
-Потом собираем Cmake
+# Build cmake
+```bash
+mkdir build
+cd build
+cmake ..
+make
+```

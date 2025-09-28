@@ -1560,6 +1560,10 @@ void CHud::RenderDummyActions()
 	{
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
+	if(g_Config.m_PMDummyHammer)
+	{
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+	}
 	Graphics()->TextureSet(GameClient()->m_HudSkin.m_SpriteHudDummyHammer);
 	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyHammerOffset, x, y);
 	y += 13;

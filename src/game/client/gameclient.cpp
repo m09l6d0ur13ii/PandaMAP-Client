@@ -567,9 +567,9 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		const bool DoHammer = m_DummyFire % g_Config.m_PmDummyHammerDelay == 0;
 		m_DummyFire++;
 
-		m_HammerInput.m_Direction = m_DummyInput.m_Direction;
-		m_HammerInput.m_Jump = m_DummyInput.m_Jump;
-		m_HammerInput.m_Hook = g_Config.m_PmDummyKeepHookOnHammer ? m_DummyInput.m_Hook : 0;
+		m_HammerInput.m_Direction = g_Config.m_PmDummyKeepMove ? m_DummyInput.m_Direction : 0;
+		m_HammerInput.m_Jump = g_Config.m_PmDummyKeepJump ? m_DummyInput.m_Jump : 0;
+		m_HammerInput.m_Hook = g_Config.m_PmDummyKeepHook ? m_DummyInput.m_Hook : 0;
 
 		const vec2 Dir = m_LocalCharacterPos - m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
 		m_HammerInput.m_TargetX = (int)Dir.x;
@@ -609,6 +609,20 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 		mem_copy(pData, &m_HammerInput, sizeof(m_HammerInput));
 		return sizeof(m_HammerInput);
 	}
+
+	if(m_DummyFire != 0)
+	{
+		m_DummyInput.m_Fire = (m_HammerInput.m_Fire + 1) & ~1;
+		m_DummyFire = 0;
+	}
+
+	if(!Force && (!m_DummyInput.m_Direction && !m_DummyInput.m_Jump && !m_DummyInput.m_Hook))
+	{
+		return 0;
+	}
+
+	mem_copy(pData, &m_DummyInput, sizeof(m_DummyInput));
+	return sizeof(m_DummyInput);
 }
 
 void CGameClient::OnConnected()

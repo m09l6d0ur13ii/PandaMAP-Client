@@ -134,31 +134,29 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 			Client()->Quit();
 	}
 
-	CUIRect PreviewLabel, PreviewRect;
-	Ui()->DoLabel(&PreviewLabel, RCLocalize("Preview:"), 14.0f, TEXTALIGN_ML);
-	PreviewRect.Margin(6.0f, &PreviewRect);
-	PreviewRect.Draw(ColorRGBA(0.12f, 0.12f, 0.12f, 0.7f), IGraphics::CORNER_ALL, 8.0f);
-	static int showDummyPreview = false;
-	vec2 PreviewPos = vec2(PreviewRect.x + PreviewRect.w / 2, PreviewRect.y + PreviewRect.h * 0.45f);
-	GameClient()->m_NamePlates.RenderNamePlatePreview(PreviewPos, showDummyPreview ? 1 : 0);
-
-	// --- Центрируем меню ближе к центру экрана ---
-	const float CenterMargin = MainView.w / 2 - 200.0f; // Было 190, стало 140 (меню ближе к центру)
-	MainView.VMargin(CenterMargin, &Menu);
-
 	// --- Персонаж, смотрящий за курсором, справа от кнопок ---
 	{
-		const float CharPreviewW = std::clamp(MainView.w * 0.13f, 80.0f, 140.0f);
-		const float CharPreviewH = std::clamp(MainView.h * 0.28f, 90.0f, 180.0f);
+		const float CharPreviewW = std::clamp(MainView.w * 0.13f, 80.0f, 140.0f); // ширина блока предпросмотра (регулируется в процентах от ширины экрана, но зажата в диапазоне)
+		const float CharPreviewH = std::clamp(MainView.h * 0.28f, 90.0f, 180.0f); // высота блока предпросмотра
 		CUIRect CharPreviewRect;
-		CharPreviewRect.x = Menu.x + Menu.w + 32.0f; // чуть больше отступ, чтобы визуально центрировать
-		CharPreviewRect.y = Button.y;
-		CharPreviewRect.w = CharPreviewW;
-		CharPreviewRect.h = CharPreviewH;
 
-		ColorRGBA bgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
-		CharPreviewRect.Draw(bgColor, IGraphics::CORNER_ALL, 10.0f);
+		// Центрируем по вертикали относительно MainView (0.5f = центр, 0.65f = чуть ниже центра)
+		CharPreviewRect.y = MainView.y + (MainView.h - CharPreviewH) * 0.65f;
 
+		// Ставим справа от центра (0.5f = центр, 1.0f = край справа, сейчас 0.70f = немного ближе к центру)
+		CharPreviewRect.x = MainView.x + MainView.w * 0.70f;
+
+		CharPreviewRect.w = CharPreviewW; // фиксируем ширину
+		CharPreviewRect.h = CharPreviewH; // фиксируем высоту
+
+		// --- Фон всего блока ---
+		ColorRGBA bgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f); // цвет фона (RGBA)
+		CUIRect CharPreviewWithLabels = CharPreviewRect;
+		CharPreviewWithLabels.y -= 40.0f; // ↑ увеличить фон сверху, чтобы влез ник и клан (регулируй)
+		CharPreviewWithLabels.h += 40.0f; // ↑ расширяем фон вниз, чтобы компенсировать смещение (регулируй)
+		CharPreviewWithLabels.Draw(bgColor, IGraphics::CORNER_ALL, 10.0f);
+
+		// --- Скины и параметры игрока ---
 		const char *pSkinName = g_Config.m_ClPlayerSkin;
 		int UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
 		unsigned ColorBody = g_Config.m_ClPlayerColorBody;
@@ -175,39 +173,46 @@ void CMenusStart::RenderStartMenu(CUIRect MainView)
 		CTeeRenderInfo OwnSkinInfo;
 		OwnSkinInfo.Apply(pOwnSkinContainer == nullptr || pOwnSkinContainer->Skin() == nullptr ? pDefaultSkin : pOwnSkinContainer->Skin().get());
 		OwnSkinInfo.ApplyColors(UseCustomColor, ColorBody, ColorFeet);
-		OwnSkinInfo.m_Size = 50.0f;
+		OwnSkinInfo.m_Size = 50.0f; // размер тишки
 
 		// --- Ник и клан над тишкой ---
 		CUIRect NameRect = CharPreviewRect;
-		NameRect.h = 16.0f;
-		NameRect.y -= 28.0f; // поднять над тишкой
+		NameRect.h = 16.0f; // высота области для текста (регулируй)
+		NameRect.y -= 3.0f; // на сколько поднять над тишкой (регулируй)
 		char aNameBuf[64];
 		str_format(aNameBuf, sizeof(aNameBuf), "%s", g_Config.m_PlayerName);
-		Ui()->DoLabel(&NameRect, aNameBuf, 13.0f, TEXTALIGN_MC);
-		NameRect.y += 13.0f; // маленький отступ
+		Ui()->DoLabel(&NameRect, aNameBuf, 13.0f, TEXTALIGN_MC); // размер 13.0f (регулируй)
+
+		NameRect.y += 13.0f; // отступ вниз для клана (регулируй)
 		char aClanBuf[64];
 		str_format(aClanBuf, sizeof(aClanBuf), "%s", g_Config.m_PlayerClan);
-		Ui()->DoLabel(&NameRect, aClanBuf, 10.0f, TEXTALIGN_MC); // клан меньше
+		Ui()->DoLabel(&NameRect, aClanBuf, 10.0f, TEXTALIGN_MC); // размер клана меньше (10.0f)
 
+		// --- Позиция самой тишки ---
 		vec2 OffsetToMid;
 		CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &OwnSkinInfo, OffsetToMid);
-		const vec2 TeeRenderPos = vec2(CharPreviewRect.x + CharPreviewRect.w / 2.0f, CharPreviewRect.y + CharPreviewRect.h * 0.32f + OffsetToMid.y);
+		const vec2 TeeRenderPos = vec2(
+			CharPreviewRect.x + CharPreviewRect.w / 2.0f, // центр блока по X (регулируй сдвиг)
+			CharPreviewRect.y + CharPreviewRect.h * 0.32f + OffsetToMid.y // позиция по Y (0.32f = регулируй высоту)
+		);
+
+		// --- Реакция тишки на курсор ---
 		const vec2 DeltaPosition = Ui()->MousePos() - TeeRenderPos;
 		const float Distance = length(DeltaPosition);
-		const float InteractionDistance = 20.0f;
+		const float InteractionDistance = 20.0f; // дистанция, на которой меняется эмоция (регулируй)
 		const vec2 TeeDirection = Distance < InteractionDistance ? normalize(vec2(DeltaPosition.x, maximum(DeltaPosition.y, 0.5f))) : normalize(DeltaPosition);
 		const int TeeEmote = Distance < InteractionDistance ? EMOTE_HAPPY : Emote;
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, TeeEmote, TeeDirection, TeeRenderPos);
 
 		// --- Кнопка профиля под тишкой ---
 		CUIRect ProfileBtn;
-		float btnHeight = std::clamp(CharPreviewRect.h * 0.13f, 22.0f, 30.0f);
-		float btnWidth = std::clamp(CharPreviewRect.w * 0.85f, 40.0f, 90.0f);
-		CharPreviewRect.HSplitBottom(btnHeight + 6.0f, &CharPreviewRect, &ProfileBtn);
-		ProfileBtn.HMargin((ProfileBtn.h - btnHeight) / 2.0f, &ProfileBtn);
-		ProfileBtn.x = CharPreviewRect.x + (CharPreviewRect.w - btnWidth) / 2.0f;
-		ProfileBtn.w = btnWidth;
-		ProfileBtn.h = btnHeight;
+		float btnHeight = std::clamp(CharPreviewRect.h * 0.13f, 22.0f, 30.0f); // высота кнопки (регулируй)
+		float btnWidth = std::clamp(CharPreviewRect.w * 0.85f, 40.0f, 90.0f); // ширина кнопки (регулируй)
+		CharPreviewRect.HSplitBottom(btnHeight + 6.0f, &CharPreviewRect, &ProfileBtn); // отступ кнопки от низа блока (6.0f регулируй)
+		ProfileBtn.HMargin((ProfileBtn.h - btnHeight) / 2.0f, &ProfileBtn); // вертикальный отступ внутри (регулируй)
+		ProfileBtn.x = CharPreviewRect.x + (CharPreviewRect.w - btnWidth) / 2.0f; // центрируем кнопку по X (регулируй)
+		ProfileBtn.w = btnWidth; // ширина кнопки
+		ProfileBtn.h = btnHeight; // высота кнопки
 		static CButtonContainer s_ProfileBtn;
 		if(GameClient()->m_Menus.DoButton_Menu(&s_ProfileBtn, Localize("TClient Profiles"), 0, &ProfileBtn, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 8.0f, 0.5f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 		{

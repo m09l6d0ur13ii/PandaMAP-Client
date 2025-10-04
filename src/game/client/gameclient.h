@@ -69,6 +69,9 @@
 #include "components/rclient/chat_bubbles.h"
 #include "components/rclient/rclient.h"
 
+//PMclient
+#include "components/pmclient/pmclient.h"
+
 //Tater
 #include "components/tclient/bg_draw.h"
 #include "components/tclient/bindchat.h"
@@ -234,6 +237,9 @@ public:
 	CRClient m_RClient;
 	CBindWheelSpec m_BindWheelSpec;
 	CAdminPanel m_AdminPanelRi;
+
+	// New companent PM
+	CPmClient m_PmClient;
 
 private:
 	std::vector<class CComponent *> m_vpAll;

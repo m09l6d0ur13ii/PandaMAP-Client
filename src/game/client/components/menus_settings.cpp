@@ -2001,6 +2001,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		TCLocalize("TClient"),
 		Localize("Profiles"),
 		Localize("Rushie"),
+		Localize("PMClient"),
 	};
 
 	static CButtonContainer s_aTabButtons[SETTINGS_LENGTH];
@@ -2068,7 +2069,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_TCLIENT)
 	{
-		GameClient()->m_MenuBackground.ChangePosition(13);
+		GameClient()->m_MenuBackground.ChangePosition(16);
 		RenderSettingsTClient(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_PROFILES)
@@ -2081,6 +2082,12 @@ void CMenus::RenderSettings(CUIRect MainView)
 		GameClient()->m_MenuBackground.ChangePosition(15);
 		RenderSettingsRushie(MainView);
 	}
+	else if(g_Config.m_UiSettingsPage == SETTINGS_PMCLIENT)
+	{
+		GameClient()->m_MenuBackground.ChangePosition(16);
+		RenderSettingsPmClient(MainView);
+	}
+
 	else
 	{
 		dbg_assert(false, "ui_settings_page invalid");

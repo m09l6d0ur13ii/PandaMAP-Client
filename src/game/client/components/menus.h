@@ -691,6 +691,7 @@ public:
 		SETTINGS_TCLIENT,
 		SETTINGS_PROFILES,
 		SETTINGS_RUSHIE,
+		SETTINGS_PMCLIENT,
 
 		SETTINGS_LENGTH,
 	};
@@ -853,6 +854,9 @@ private:
 	void RenderSettingsRushieNameplatesEditor(CUIRect MainView);
 	void RenderSettingsRushieRCON(CUIRect MainView);
 	void RenderSettingsRushieInfo(CUIRect MainView);
+
+	// Rushie
+	void RenderSettingsPmClient(CUIRect MainView);
 
 	const CWarType *m_pRemoveWarType = nullptr;
 	void PopupConfirmRemoveWarType();

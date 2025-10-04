@@ -2543,6 +2543,9 @@ if(CLIENT)
     components/rclient/menus_rclient.cpp
     components/rclient/rclient.cpp
     components/rclient/rclient.h
+    components/pmclient/pmclient.cpp
+    components/pmclient/pmclient.h
+    components/pmclient/menus_pmclient.cpp
     components/scoreboard.cpp
     components/scoreboard.h
     components/skins.cpp

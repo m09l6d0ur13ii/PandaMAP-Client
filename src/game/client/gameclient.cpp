@@ -144,6 +144,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Ghost,
 					      &m_TClient,
 					      &m_RClient, // Must be before chat and players
+					      &m_PmClient,
 					      &m_Players,
 					      &m_MapLayersForeground,
 					      &m_Outlines,
@@ -564,26 +565,9 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 
 	if(g_Config.m_PmDummyHammer)
 	{
-		const bool DoHammer = m_DummyFire % g_Config.m_PmDummyHammerDelay == 0;
-		m_DummyFire++;
-
-		m_HammerInput.m_Direction = g_Config.m_PmDummyKeepMove ? m_DummyInput.m_Direction : 0;
-		m_HammerInput.m_Jump = g_Config.m_PmDummyKeepJump ? m_DummyInput.m_Jump : 0;
-		m_HammerInput.m_Hook = g_Config.m_PmDummyKeepHook ? m_DummyInput.m_Hook : 0;
-
-		const vec2 Dir = m_LocalCharacterPos - m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Predicted.m_Pos;
-		m_HammerInput.m_TargetX = (int)Dir.x;
-		m_HammerInput.m_TargetY = (int)Dir.y;
-
-		m_HammerInput.m_WantedWeapon = m_aClients[m_aLocalIds[!g_Config.m_ClDummy]].m_Predicted.m_ActiveWeapon != WEAPON_HAMMER ? WEAPON_HAMMER + 1 : WEAPON_HAMMER;\
-		m_HammerInput.m_Fire = DoHammer ? (m_HammerInput.m_Fire + 1) | 1 : 0;
-		if(DoHammer && !g_Config.m_ClDummyRestoreWeapon)
-		{
-			m_DummyInput.m_WantedWeapon = WEAPON_HAMMER + 1;
-		}
-
-		mem_copy(pData, &m_HammerInput, sizeof(m_HammerInput));
-		return sizeof(m_HammerInput);
+		int Size = m_PmClient.BuildPmDummyHammerInput(*this, pData);
+		if(Size > 0)
+			return Size;
 	}
 
 	if(g_Config.m_ClDummyHammer)
